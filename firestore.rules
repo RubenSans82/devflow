@@ -1,0 +1,64 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /projects/{projectId} {
+      allow read: if request.auth != null || (resource.data.isPublic == true);
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && request.auth.uid == resource.data.ownerId;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
+    }
+
+    match /tasks/{taskId} {
+      allow read: if (
+        // Proyecto público
+        get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.isPublic == true
+        // O usuario autenticado y cumple algún rol
+        || (
+          request.auth != null &&
+          (
+            // Dueño del proyecto
+            get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.ownerId == request.auth.uid
+            // Colaborador
+            || (get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.collaborators is list
+                && request.auth.uid in get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.collaborators)
+            // Creador de la tarea
+            || resource.data.creatorId == request.auth.uid
+            // Asignado a la tarea
+            || (resource.data.assignedTo != null && resource.data.assignedTo == request.auth.uid)
+          )
+        )
+      );
+
+      allow create: if request.auth != null && (
+        get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.ownerId == request.auth.uid
+        || (
+          get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.collaborators is list
+          && request.auth.uid in get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.collaborators
+        )
+      );
+
+      allow update: if request.auth != null && (
+        get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.ownerId == request.auth.uid
+        || (
+          get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.collaborators is list
+          && request.auth.uid in get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.collaborators
+        )
+        || resource.data.creatorId == request.auth.uid
+        || (resource.data.assignedTo != null && resource.data.assignedTo == request.auth.uid)
+      );
+
+      allow delete: if request.auth != null && (
+        get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.ownerId == request.auth.uid
+        || resource.data.creatorId == request.auth.uid
+      );
+    }
+
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
