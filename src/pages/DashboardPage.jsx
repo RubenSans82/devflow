@@ -47,6 +47,33 @@ const DashboardPage = () => {
     return null; 
   }
 
+  const handleRadialAction = (action, projectId) => {
+    console.log(`Dashboard action: ${action}, for project ID: ${projectId}`);
+    // Lógica para manejar cada acción
+    switch (action) {
+      case 'view_details':
+        navigate(`/project/${projectId}`);
+        break;
+      case 'edit_project':
+        navigate(`/edit-project/${projectId}`);
+        break;
+      case 'add_task':
+        console.log('Abrir modal para añadir tarea al proyecto:', projectId);
+        break;
+      case 'add_collaborator':
+        console.log('Abrir modal para añadir colaborador al proyecto:', projectId);
+        break;
+      case 'delete_project':
+        // Aquí se manejaría la lógica para eliminar el proyecto
+        // Podría ser mostrar un modal de confirmación primero
+        console.log('Iniciar flujo para eliminar proyecto:', projectId);
+        // Ejemplo: setSelectedProjectForDeletion(projectId); openConfirmationModal(true);
+        break;
+      default:
+        console.warn(`Acción desconocida: ${action}`);
+    }
+  };
+
   return (
     <div className="container mt-5">
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -77,12 +104,15 @@ const DashboardPage = () => {
           <Link to="/create-project">¡Crea tu primer proyecto!</Link>
         </div>
       ) : (
-        <div className="projects-list-page-styles-wrapper"> {/* MODIFICADO el wrapper principal */}
-          <div className="row g-4"> {/* MODIFICADO para usar g-4 como en ProjectsListPage */}
+        <div className="projects-list-page-styles-wrapper">
+          <div className="row g-4">
             {userProjects.map(project => (
-              // MODIFICADO: Clases de columna para coincidir con ProjectsListPage
               <div key={project.id} className="col-12 col-md-6 col-lg-4 d-flex align-items-stretch plist-card-column-wrapper">
-                <ProjectCard project={project} displayContext="projectsList" /> {/* MODIFICADO: Añadida la prop displayContext */} 
+                <ProjectCard 
+                  project={project} 
+                  displayContext="dashboard" 
+                  onRadialAction={handleRadialAction} 
+                />
               </div>
             ))}
           </div>

@@ -23,6 +23,7 @@
   --df-primary-glow: rgba(var(--df-primary-rgb), 0.35); /* Brillo base ligeramente aumentado */
   --df-primary-glow-hover: rgba(var(--df-primary-rgb), 0.65); /* Brillo hover ligeramente aumentado */
   --df-primary-light: #63ceff; /* Tono azul claro para brillos y texto, ajustado */
+  --df-primary-light-rgb: 99, 206, 255; /* NUEVO: RGB para --df-primary-light */
   --df-primary-neon-glow: var(--df-primary);
 
   /* Colores para el nuevo estilo de tarjeta tipo ejemplo */
@@ -35,6 +36,7 @@
   
   /* Nuevas variables para manejar colores de error y peligro */
   --df-error: #dc3545; /* Rojo Bootstrap Danger */
+  --df-error-rgb: 220, 53, 69; /* NUEVO: RGB para --df-error */
   --bs-danger: #dc3545; /* Para compatibilidad con Bootstrap */
 
   /* Variables específicas para las tarjetas futuristas de la página de listado de proyectos */
@@ -1027,4 +1029,157 @@ input:-webkit-autofill:active {
     line-clamp: 4; /* Estándar */
     -webkit-box-orient: vertical;
 }
+
+/* Styles for ProjectCard on Dashboard with Radial Menu */
+.project-card-dashboard-wrapper {
+  position: relative; /* Needed for absolute positioning of the radial menu */
+}
+
+.radial-menu-overlay {
+  position: fixed; /* Cover the whole screen */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050; /* Ensure it's above other content */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s ease, visibility 0s linear 0.6s; /* Ajustado de 0.3s a 0.6s */
+}
+
+.radial-menu-overlay.open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.6s ease; /* Ajustado de 0.3s a 0.6s */
+}
+
+.radial-menu {
+  position: relative;
+  width: 300px; /* Aumentado de 250px */
+  height: 300px; /* Aumentado de 250px */
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: scale(0.3) rotate(-270deg); /* Más recorrido: scale 0.3, rotate -270deg */
+  transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Más lenta: 0.6s */
+}
+
+.radial-menu.open {
+  transform: scale(1) rotate(0deg);
+}
+
+.radial-menu-item {
+  position: absolute;
+  width: 70px; 
+  height: 80.83px; 
+  color: var(--df-accent-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1.5rem; 
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  /* SVG con stroke-width aumentado a 2.5 */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 70 80.83' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='35,0 70,20.2075 70,60.6225 35,80.83 0,60.6225 0,20.2075' fill='transparent' stroke='%2300A9E0' stroke-width='2.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  filter: 
+    drop-shadow(0 0 4px var(--df-accent-primary)) /* Resplandor un poco más extenso */
+    drop-shadow(0 0 8px rgba(var(--df-accent-primary-rgb), 0.8)); /* Resplandor un poco más extenso */
+  opacity: 0;
+  transform: translate(0,0) scale(0.5);
+  /* Duraciones de transform y opacity ajustadas a 0.6s */
+  transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.6s ease-out, filter 0.2s ease, color 0.2s ease; 
+}
+
+.radial-menu.open .radial-menu-item {
+  opacity: 1;
+}
+
+/* Nuevas posiciones para un radio de 110px */
+.radial-menu.open .radial-menu-item.view { transform: translate(0, -110px) scale(1); }
+.radial-menu.open .radial-menu-item.edit { transform: translate(95.26px, -55px) scale(1); } /* cos(30)*110, -sin(30)*110 */
+.radial-menu.open .radial-menu-item.add-task { transform: translate(95.26px, 55px) scale(1); }
+.radial-menu.open .radial-menu-item.add-collab { transform: translate(-95.26px, 55px) scale(1); }
+.radial-menu.open .radial-menu-item.delete { transform: translate(-95.26px, -55px) scale(1); }
+.radial-menu.open .radial-menu-item.cancel { transform: translate(0, 110px) scale(1); }
+
+.radial-menu-item:hover {
+  color: var(--df-primary-light);
+  background-color: transparent !important;
+  border: none !important;
+  filter: 
+    drop-shadow(0 0 8px var(--df-primary-light)) /* Más extendido */
+    drop-shadow(0 0 16px rgba(var(--df-primary-light-rgb), 0.95)); /* Mucho más intenso y opaco */
+}
+
+.radial-menu-item.delete {
+  color: var(--df-error);
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  /* SVG con stroke-width aumentado a 2.5 */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 70 80.83' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='35,0 70,20.2075 70,60.6225 35,80.83 0,60.6225 0,20.2075' fill='transparent' stroke='%23dc3545' stroke-width='2.5'/%3E%3C/svg%3E");
+  filter: 
+    drop-shadow(0 0 4px var(--df-error))
+    drop-shadow(0 0 8px rgba(var(--df-error-rgb), 0.8));
+}
+
+.radial-menu-item.delete:hover {
+  color: var(--df-error);
+  background-color: transparent !important;
+  border: none !important;
+  filter: 
+    drop-shadow(0 0 8px var(--df-error)) /* Más extendido */
+    drop-shadow(0 0 16px rgba(var(--df-error-rgb), 0.95)); /* Mucho más intenso y opaco */
+}
+
+/* Hover: apply scale ON TOP of existing translate, only when menu is open */
+.radial-menu.open .radial-menu-item.view:hover { transform: translate(0, -110px) scale(1.2); }
+.radial-menu.open .radial-menu-item.edit:hover { transform: translate(95.26px, -55px) scale(1.2); }
+.radial-menu.open .radial-menu-item.add-task:hover { transform: translate(95.26px, 55px) scale(1.2); }
+.radial-menu.open .radial-menu-item.add-collab:hover { transform: translate(-95.26px, 55px) scale(1.2); }
+.radial-menu.open .radial-menu-item.delete:hover { transform: translate(-95.26px, -55px) scale(1.2); }
+.radial-menu.open .radial-menu-item.cancel:hover { transform: translate(0, 110px) scale(1.2); }
+
+
+.radial-menu-item i {
+  pointer-events: none; /* Ensure icon doesn't interfere with button click */
+}
+
+/* Positioning for 6 items - These specific rules are now conditional on .radial-menu.open */
+/* Angle between items: 360 / 6 = 60 degrees */
+/* Radius of the circle where items are placed: ~90px-100px */
+
+/* DELETE THESE OLD RULES as they are replaced by .radial-menu.open .radial-menu-item.CLASS rules above */
+/*
+.radial-menu-item.view { 
+  transform: translate(0, -95px) scale(1);
+}
+.radial-menu-item.edit { 
+  transform: translate(82.27px, -47.5px) scale(1); 
+}
+.radial-menu-item.add-task { 
+  transform: translate(82.27px, 47.5px) scale(1); 
+}
+.radial-menu-item.add-collab { 
+  transform: translate(-82.27px, 47.5px) scale(1); 
+}
+.radial-menu-item.delete { 
+  transform: translate(-82.27px, -47.5px) scale(1); 
+}
+.radial-menu-item.cancel { 
+  transform: translate(0, 95px) scale(1);
+}
+*/
+
+/* Ensure project card itself is clickable and has a pointer */
 
