@@ -57,22 +57,27 @@ const ProjectCard = ({ project, showDetailsButton = true, displayContext = 'home
           <div className={`radial-menu ${isRadialMenuOpen ? 'open' : ''}`} onClick={(e) => e.stopPropagation()}> 
             <button className="radial-menu-item view" onClick={() => handleActionClick('view_details')} title="Ver Detalles">
               <i className="bi bi-eye-fill"></i>
+              <div className="radial-menu-action-label">Ver Detalles</div>
             </button>
             <button className="radial-menu-item edit" onClick={() => handleActionClick('edit_project')} title="Editar Proyecto">
               <i className="bi bi-pencil-fill"></i>
+              <div className="radial-menu-action-label">Editar Proyecto</div>
             </button>
             <button className="radial-menu-item add-task" onClick={() => handleActionClick('add_task')} title="Añadir Tarea">
-              <i className="bi bi-plus-lg"></i> 
+              <i className="bi bi-plus-lg"></i>
+              <div className="radial-menu-action-label">Añadir Tarea</div>
             </button>
             <button className="radial-menu-item add-collab" onClick={() => handleActionClick('add_collaborator')} title="Añadir Colaborador">
               <i className="bi bi-person-plus-fill"></i>
+              <div className="radial-menu-action-label">Añadir Colaborador</div>
             </button>
-            {/* Nuevo botón para eliminar proyecto */}
             <button className="radial-menu-item delete" onClick={() => handleActionClick('delete_project')} title="Eliminar Proyecto">
               <i className="bi bi-trash-fill"></i>
+              <div className="radial-menu-action-label">Eliminar Proyecto</div>
             </button>
             <button className="radial-menu-item cancel" onClick={toggleRadialMenu} title="Cancelar">
               <i className="bi bi-x-lg"></i>
+              <div className="radial-menu-action-label">Cancelar</div>
             </button>
           </div>
         </div>
