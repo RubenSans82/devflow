@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { Routes, Route, Navigate, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 import Navbar from './components/Navbar';
@@ -12,6 +12,7 @@ import ProjectDetailPage from './pages/ProjectDetailPage';
 import UserProfilePage from './pages/UserProfilePage';
 import CreateProjectPage from './pages/CreateProjectPage';
 import EditProjectPage from './pages/EditProjectPage';
+import './App.css';
 
 // Componente para proteger rutas
 const ProtectedRoute = ({ children }) => {
@@ -32,56 +33,56 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="d-flex flex-column min-vh-100">
-          <Navbar />
-          <main className="flex-grow-1">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/projects" element={<ProjectsListPage />} />
-              <Route path="/project/:projectId" element={<ProjectDetailPage />} />
-              
-              <Route 
-                path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <DashboardPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/profile" 
-                element={
-                  <ProtectedRoute>
-                    <UserProfilePage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/create-project" // Cambiado de /projects/new a /create-project
-                element={
-                  <ProtectedRoute>
-                    <CreateProjectPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/project/edit/:projectId" 
-                element={
-                  <ProtectedRoute>
-                    <EditProjectPage />
-                  </ProtectedRoute>
-                } 
-              />
-              
-              {/* Ruta para manejar páginas no encontradas */}
-              <Route path="*" element={<div className="container mt-5 text-center"><h2>404: Página No Encontrada</h2><Link to="/">Volver al Inicio</Link></div>} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </Router>
+      <div className="App d-flex flex-column min-vh-100"> {/* Asegura que App ocupe toda la altura y sea un flex container */}
+        <Navbar />
+        <main className="flex-grow-1 d-flex flex-column"> {/* flex-grow-1 para que main ocupe el espacio disponible */}
+            <div className="d-flex flex-column min-vh-100">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/projects" element={<ProjectsListPage />} />
+                <Route path="/project/:projectId" element={<ProjectDetailPage />} />
+                
+                <Route 
+                  path="/dashboard" 
+                  element={
+                    <ProtectedRoute>
+                      <DashboardPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/profile" 
+                  element={
+                    <ProtectedRoute>
+                      <UserProfilePage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/create-project" // Cambiado de /projects/new a /create-project
+                  element={
+                    <ProtectedRoute>
+                      <CreateProjectPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/project/edit/:projectId" 
+                  element={
+                    <ProtectedRoute>
+                      <EditProjectPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                {/* Ruta para manejar páginas no encontradas */}
+                <Route path="*" element={<div className="container mt-5 text-center"><h2>404: Página No Encontrada</h2><Link to="/">Volver al Inicio</Link></div>} />
+              </Routes>
+            </div>
+        </main>
+        <Footer />
+      </div>
     </AuthProvider>
   );
 }

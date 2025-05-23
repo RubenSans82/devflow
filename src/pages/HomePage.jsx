@@ -49,7 +49,7 @@ const HomePage = () => {
       </section>
 
       {/* Sección de Proyectos de Ejemplo */}
-      <section className="py-5" style={{ backgroundColor: 'var(--df-bg-primary)'}}>
+      <section className="py-5" style={{ backgroundColor: 'transparent'}}>
         <div className="container">
           <h2 className="text-center mb-5 pb-5 fw-bold" style={{ color: 'var(--df-text-primary)' }}>Proyectos Destacados</h2>
           {loading && <p className="text-center" style={{ color: 'var(--df-text-secondary)' }}>Cargando proyectos...</p>}
@@ -70,7 +70,7 @@ const HomePage = () => {
       </section>
 
       {/* Sección de Características */}
-      <section className="features-section py-5">
+      <section className="features-section py-5" style={{ backgroundColor: 'transparent'}}>
         <div className="container">
           <h2 className="text-center mb-5 fw-bold" style={{ color: 'var(--df-text-primary)' }}>Características Principales</h2>
           <div className="row justify-content-center">

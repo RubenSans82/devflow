@@ -69,33 +69,32 @@ const ProjectsListPage = () => {
   }
 
   return (
-    <div className="container mt-5">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        {/* El título cambia según si el usuario está logueado */}
-        <h1>{currentUser ? 'Todos los Proyectos' : 'Proyectos Públicos'}</h1>
-        {currentUser && (
-          <Link to="/create-project" className="btn btn-primary">
-            <i className="bi bi-plus-circle-fill me-2"></i>Crear Nuevo Proyecto
-          </Link>
+    // Nueva clase contenedora para aplicar estilos específicos a esta página
+    <div className="projects-list-page-styles-wrapper">
+      <div className="container mt-5">
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h1>{currentUser ? 'Todos los Proyectos' : 'Proyectos Públicos'}</h1>
+          {/* Botón de crear proyecto eliminado */}
+        </div>
+        
+        {projects.length === 0 && !loading ? (
+          <div className="alert alert-info" role="alert">
+            {currentUser 
+              ? "No hay proyectos disponibles en la plataforma o aún no has creado ninguno."
+              : "Actualmente no hay proyectos públicos disponibles."}
+            {/* Enlace para crear proyecto eliminado */}
+          </div>
+        ) : (
+          <div className="row g-4"> {/* Bootstrap grid row */}
+            {projects.map(project => (
+              // Clase de columna de Bootstrap con d-flex para igualar alturas y wrapper específico renombrado
+              <div className="col-12 col-md-6 col-lg-4 d-flex align-items-stretch plist-card-column-wrapper" key={project.id}>
+                <ProjectCard project={project} displayContext="projectsList" showDetailsButton={true} />
+              </div>
+            ))}
+          </div>
         )}
       </div>
-      
-      {projects.length === 0 && !loading ? (
-        <div className="alert alert-info" role="alert">
-          {currentUser 
-            ? "No hay proyectos disponibles en la plataforma o aún no has creado ninguno."
-            : "Actualmente no hay proyectos públicos disponibles."}
-          {currentUser && (
-            <Link to="/create-project" className="ms-2">¡Crea tu primer proyecto!</Link>
-          )}
-        </div>
-      ) : (
-        <div className="row">
-          {projects.map(project => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
-      )}
     </div>
   );
 };

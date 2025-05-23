@@ -230,33 +230,26 @@ export const deleteTask = async (taskId) => { // Solo se necesita taskId
   await deleteDoc(taskRef);
 };
 
-// Nueva función para obtener el perfil de un usuario por ID
-export const getUserProfileById = async (userId) => {
-  if (!userId) return null;
-  const userRef = doc(db, 'users', userId);
-  const userSnap = await getDoc(userRef);
+// --- Funciones para Usuarios (añadido getUserDocument) ---
+
+// Obtener el documento de un usuario específico desde Firestore
+export const getUserDocument = async (userId) => {
+  if (!userId) {
+    console.error("Se requiere userId para obtener el documento del usuario.");
+    return null; // O lanzar un error, según prefieras
+  }
+  const userDocRef = doc(db, USERS_COLLECTION, userId);
+  const userSnap = await getDoc(userDocRef);
+
   if (userSnap.exists()) {
     return { id: userSnap.id, ...userSnap.data() };
   } else {
-    console.warn(`User profile not found for ID: ${userId}`);
-    return null;
+    console.warn(`No se encontró un documento para el usuario con ID: ${userId}`);
+    return null; // El usuario de Auth existe, pero no hay documento en Firestore (podría pasar)
   }
 };
 
-// Nueva función para obtener todos los usuarios (para selectores de asignación, etc.)
-export const getAllUsers = async () => {
-  try {
-    const querySnapshot = await getDocs(collection(db, USERS_COLLECTION));
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    console.error("Error al obtener todos los usuarios: ", error);
-    throw error;
-  }
-};
-
-// --- Funciones para Usuarios --- (Ejemplo básico)
-
-// Guardar o actualizar información del usuario (ej. al loguearse)
+// Crear o actualizar un usuario en Firestore
 export const upsertUser = async (userData) => {
   if (!userData || !userData.uid) {
     console.error("Datos de usuario inválidos para upsert");
@@ -286,6 +279,17 @@ export const upsertUser = async (userData) => {
     console.log("Usuario guardado/actualizado en Firestore:", userData.uid, "con datos:", dataToSet);
   } catch (error) {
     console.error("Error al guardar/actualizar usuario en Firestore:", error);
+    throw error;
+  }
+};
+
+// Nueva función para obtener todos los usuarios
+export const getAllUsers = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, USERS_COLLECTION));
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error al obtener todos los usuarios: ", error);
     throw error;
   }
 };

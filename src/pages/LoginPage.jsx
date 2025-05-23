@@ -30,18 +30,23 @@ const LoginPage = () => {
       console.log("Firebase Auth User:", JSON.stringify(user, null, 2));
       console.log("Additional User Info:", JSON.stringify(additionalUserInfo, null, 2));
 
-      let finalDisplayName = user.displayName; // Valor primario
-
-      if (!finalDisplayName && additionalUserInfo?.username) {
-        console.log("user.displayName es null, usando additionalUserInfo.username:", additionalUserInfo.username);
+      // Determinar el displayName final que se guardará en Firestore
+      // Prioridad: 1. GitHub username, 2. Firebase displayName, 3. Prefijo del email
+      let finalDisplayName;
+      if (additionalUserInfo?.username) {
         finalDisplayName = additionalUserInfo.username;
-      } else if (!finalDisplayName && user.email) {
-        console.log("user.displayName y additionalUserInfo.username son null, usando el prefijo del email.");
-        finalDisplayName = user.email.split('@')[0];
+        console.log("Usando GitHub username (additionalUserInfo.username) para displayName:", finalDisplayName);
       } else if (user.displayName) {
-        console.log("Usando user.displayName:", user.displayName);
+        finalDisplayName = user.displayName;
+        console.log("GitHub username no disponible, usando Firebase Auth displayName (user.displayName):", finalDisplayName);
+      } else if (user.email) {
+        finalDisplayName = user.email.split('@')[0];
+        console.log("Ni GitHub username ni Firebase Auth displayName disponibles, usando prefijo de email:", finalDisplayName);
+      } else {
+        // Fallback si no hay ninguna información de nombre disponible
+        finalDisplayName = 'Usuario DevFlow'; // O null, según se prefiera que el campo quede vacío
+        console.log("No se pudo determinar un nombre, usando fallback:", finalDisplayName);
       }
-
 
       const userDataForFirestore = {
         uid: user.uid,
@@ -65,10 +70,10 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="container mt-5">
+    <div className="container login-page-container py-5">
       <div className="row justify-content-center">
-        <div className="col-md-6 col-lg-5">
-          <div className="card shadow-sm">
+        <div className="col-md-10 col-lg-8"> {/* Cambiado de col-md-8 col-lg-6 */}
+          <div className="card">
             <div className="card-body p-4">
               <h2 className="card-title text-center mb-4">Iniciar Sesión en DevFlow</h2>
               {error && <div className="alert alert-danger">{error}</div>}
@@ -90,7 +95,7 @@ const LoginPage = () => {
               </button>
               
               <p className="text-center text-muted mt-3">
-                ¿Aún no tienes cuenta? <Link to="/#">Regístrate</Link> {/* Enlace de registro futuro */}
+                ¿Aún no tienes cuenta? <a href="https://github.com/signup" target="_blank" rel="noopener noreferrer">Regístrate en GitHub</a>
               </p>
             </div>
           </div>

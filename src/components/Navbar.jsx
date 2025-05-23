@@ -32,33 +32,42 @@ const Navbar = () => {
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto">
-            <li className="nav-item">
-              <Link className="nav-link" to="/">Home</Link>
-            </li>
+          <ul className="navbar-nav ms-auto align-items-center"> {/* Añadida clase align-items-center */}
             {currentUser ? (
-              <li className="nav-item dropdown">
-                <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  {currentUser.photoURL ? (
-                    <img src={currentUser.photoURL} alt={currentUser.displayName || 'Avatar'} style={{ width: '30px', height: '30px', borderRadius: '50%', marginRight: '8px' }} />
-                  ) : (
-                    <i className="bi bi-person-circle me-1"></i>
-                  )}
-                  {currentUser.displayName || currentUser.email}
-                </a>
-                <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
-                  <li><Link className="dropdown-item" to="/dashboard">Dashboard</Link></li>
-                  <li><Link className="dropdown-item" to="/profile">Perfil</Link></li>
-                  <li><hr className="dropdown-divider" /></li>
-                  <li>
-                    <button className="dropdown-item" onClick={handleLogout}>Logout</button>
-                  </li>
-                </ul>
-              </li>
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/dashboard">Dashboard</Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/projects">Proyectos</Link>
+                </li>
+                <li className="nav-item dropdown">
+                  <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {currentUser.photoURL ? (
+                      <img src={currentUser.photoURL} alt={currentUser.displayName || 'Avatar'} style={{ width: '30px', height: '30px', borderRadius: '50%', marginRight: '8px' }} />
+                    ) : (
+                      <i className="bi bi-person-circle me-1"></i>
+                    )}
+                    {currentUser.displayName || currentUser.email}
+                  </a>
+                  <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+                    <li><Link className="dropdown-item" to="/profile">Perfil</Link></li>
+                    <li><hr className="dropdown-divider" /></li>
+                    <li>
+                      <button className="dropdown-item" onClick={handleLogout}>Logout</button>
+                    </li>
+                  </ul>
+                </li>
+              </>
             ) : (
-              <li className="nav-item">
-                <Link className="nav-link" to="/login">Login</Link>
-              </li>
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/">Home</Link> {/* Enlace Home para usuarios no logueados */}
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/login">Login</Link>
+                </li>
+              </>
             )}
           </ul>
         </div>

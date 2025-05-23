@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useAuth } from '../contexts/AuthContext';
-import { getUserProfileById } from '../services/firestore';
+import { getUserDocument } from '../services/firestore'; // Corregido: getUserProfileById -> getUserDocument
 
 // Función para determinar la clase de la insignia según el estado
 const getStatusBadgeClass = (status) => {
@@ -49,12 +49,12 @@ const TaskItem = ({ task, projectOwnerId, onEdit, onDelete, onStatusChange }) =>
   useEffect(() => {
     const fetchUserNames = async () => {
       if (task.creatorId) {
-        const creatorProfile = await getUserProfileById(task.creatorId);
-        setCreatorDisplayName(creatorProfile?.displayName || task.creatorId);
+        const creatorProfile = await getUserDocument(task.creatorId); // Corregido: getUserProfileById -> getUserDocument
+        setCreatorDisplayName(creatorProfile?.displayName || creatorProfile?.githubUsername || task.creatorId);
       }
       if (task.assignedTo) {
-        const assignedToProfile = await getUserProfileById(task.assignedTo);
-        setAssignedToDisplayName(assignedToProfile?.displayName || task.assignedTo);
+        const assignedToProfile = await getUserDocument(task.assignedTo); // Corregido: getUserProfileById -> getUserDocument
+        setAssignedToDisplayName(assignedToProfile?.displayName || assignedToProfile?.githubUsername || task.assignedTo);
       }
     };
     fetchUserNames();

@@ -51,14 +51,7 @@ const DashboardPage = () => {
     <div className="container mt-5">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1>Dashboard de {currentUser.displayName || currentUser.email}</h1>
-        <div>
-          <Link to="/profile" className="btn btn-outline-secondary me-2">
-            <i className="bi bi-person-fill me-1"></i> Ver Perfil
-          </Link>
-          <button onClick={handleLogout} className="btn btn-outline-danger">
-            <i className="bi bi-box-arrow-right me-1"></i> Cerrar Sesión
-          </button>
-        </div>
+        {/* Botones de Ver Perfil y Cerrar Sesión eliminados */}
       </div>
 
       <div className="mb-4 p-3 rounded">

@@ -13,7 +13,8 @@
   --df-text-secondary: #A0A0B0;
   --df-accent-primary: #00A9E0;
   --df-accent-primary-rgb: 0, 169, 224; /* RGB para #00A9E0 */
-  
+  --df-accent-secondary-rgb: 74, 144, 226; /* RGB for --df-accent-secondary #4A90E2 */
+
   /* Tech Style Colors - CORREGIDO */
   --df-primary: var(--df-accent-primary); /* Usar el color de acento como base para "tech" */
   --df-primary-rgb: var(--df-accent-primary-rgb); /* Usar el RGB del acento */
@@ -31,11 +32,39 @@
   --df-card-skew-gradient-3: linear-gradient(315deg, #4dff03, #00d0ff); /* Verde/Azul claro del ejemplo */
   --df-card-content-bg: rgba(0, 0, 0, 0.4); /* Fondo del contenido con opacidad negra más sutil */
   --df-card-span-bg: rgba(var(--df-primary-rgb), 0.1); /* Fondo de los brillos flotantes */
+  
+  /* Nuevas variables para manejar colores de error y peligro */
+  --df-error: #dc3545; /* Rojo Bootstrap Danger */
+  --bs-danger: #dc3545; /* Para compatibilidad con Bootstrap */
+
+  /* Variables específicas para las tarjetas futuristas de la página de listado de proyectos */
+  --listpage-primary-glow-color: var(--df-accent-primary);
+  --listpage-secondary-glow-color: var(--df-accent-secondary);
+  --listpage-card-bg-color: rgba(var(--df-primary-rgb), 0.85); /* Usa --df-primary-rgb: 11, 28, 46 */
+  --listpage-card-border-color: var(--listpage-primary-glow-color);
+  --listpage-text-primary-color: var(--df-text-primary);
+  --listpage-text-secondary-color: var(--df-text-secondary);
+  --listpage-title-font: var(--font-family-headings);
+  --listpage-body-font: var(--font-family-sans-serif);
+  --listpage-arrow-width: 40px;
+  --listpage-card-border-width: 2px;
+
+  /* Variables específicas para las tarjetas futuristas de la página de listado de proyectos */
+  --plist-primary-glow-color: var(--df-accent-primary);
+  --plist-secondary-glow-color: var(--df-accent-secondary);
+  --plist-card-bg-color: rgba(var(--df-primary-rgb), 0.85); /* Fondo oscuro translúcido de DevFlow */
+  --plist-card-border-color: var(--plist-primary-glow-color);
+  --plist-text-primary-color: var(--df-text-primary);
+  --plist-text-secondary-color: var(--df-text-secondary);
+  --plist-title-font: var(--font-family-headings);
+  --plist-body-font: var(--font-family-sans-serif);
+  --plist-arrow-width: 40px;
+  --plist-card-border-width: 2px;
 }
 
 html {
-  background-color: var(--df-bg-primary);
-  height: 100%; /* Asegurar que html ocupe toda la altura */
+  background-color: var(--df-bg-primary); /* Color de fondo final */
+  height: 100%;
 }
 
 body {
@@ -43,14 +72,21 @@ body {
   font-family: var(--font-family-sans-serif); /* Actualizado a Roboto */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--df-bg-primary);
+  background-color: transparent; /* Hacer transparente para mostrar la rejilla del html o una imagen de fondo si se define aquí */
   color: var(--df-text-primary);
   line-height: 1.5;
-  min-height: 100%; /* Asegurar que body ocupe toda la altura */
+  min-height: 100%;
+
+  /* Aplicar la rejilla globalmente al body */
+  background-image:
+    linear-gradient(rgba(var(--df-accent-primary-rgb), 0.07) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, rgba(var(--df-accent-primary-rgb), 0.07) 1.5px, transparent 1.5px);
+  background-size: 40px 40px;
+  background-attachment: fixed; /* Para que la rejilla no se desplace con el contenido */
 }
 
 #root {
-  background-color: var(--df-bg-primary);
+  background-color: transparent; /* Hacer transparente para que se vea la rejilla del body */
   min-height: 100vh; /* Asegurar que el contenedor de React ocupe toda la altura de la vista */
 }
 
@@ -517,7 +553,7 @@ input:-webkit-autofill:active {
   justify-content: center;
   text-align: center;
   min-height: calc(100vh - 70px); /* Altura de la ventana menos la altura del navbar */
-  background-color: var(--df-bg-primary); /* Fondo base */
+  background-color: transparent; /* Asegurar que sea transparente */
 }
 
 .hero-section::before { /* Capa de rejilla futurista */
@@ -527,12 +563,14 @@ input:-webkit-autofill:active {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
-    linear-gradient(rgba(var(--df-accent-primary-rgb), 0.10) 1.5px, transparent 1.5px), /* Opacidad de línea ligeramente aumentada */
-    linear-gradient(90deg, rgba(var(--df-accent-primary-rgb), 0.10) 1.5px, transparent 1.5px); /* Opacidad de línea ligeramente aumentada */
-  background-size: 40px 40px; 
-  opacity: 0.6; /* Opacidad general de la rejilla ligeramente aumentada */
+  /* Se elimina background-image de aquí para que no duplique la del body */
+  /* background-image: 
+    linear-gradient(rgba(var(--df-accent-primary-rgb), 0.10) 1.5px, transparent 1.5px), 
+    linear-gradient(90deg, rgba(var(--df-accent-primary-rgb), 0.10) 1.5px, transparent 1.5px); 
+  background-size: 40px 40px; */
+  opacity: 0.6; /* Opacidad general de la capa, puede ajustarse si es necesario */
   z-index: 1;
+  pointer-events: none; /* Para asegurar que no interfiera con interacciones */
 }
 
 .hero-section-content { /* Contenedor para el texto y botón */
@@ -640,8 +678,8 @@ input:-webkit-autofill:active {
 .home-project-card-wrapper .card::before { /* Fondo inclinado principal */
   content: ' ';
   position: absolute;
-  top: -20px; /* Ajustado para que el fondo sobresalga por arriba */
-  left: 40px; 
+  top: 10px; /* Ajustado para que el fondo sobresalga por arriba */
+  left: 80px; 
   width: 50%;  
   height: 340px; 
   background: var(--df-card-bg-skew-gradient); 
@@ -654,8 +692,8 @@ input:-webkit-autofill:active {
 .home-project-card-wrapper .card::after { /* Brillo difuso del fondo inclinado */
   content: '';
   position: absolute;
-  top: -40px; /* Ajustado para que el fondo sobresalga por arriba */
-  left: 40px; 
+  top: 0px; /* Ajustado para que el fondo sobresalga por arriba */
+  left: 70px; 
   width: 50%; 
   height: 340px; 
   background: var(--df-card-bg-skew-gradient); 
@@ -700,7 +738,7 @@ input:-webkit-autofill:active {
 .home-project-card-wrapper .card:hover::before,
 .home-project-card-wrapper .card:hover::after {
   transform: skewX(0deg);
-  top: -20px; /* (420px card height - 340px bg height) / 2 */
+  top: 10px; /* (420px card height - 340px bg height) / 2 */
   left: -10px; 
   width: calc(100% - 20px); 
   height: 340px; /* Altura fija igual al estado normal */
@@ -837,41 +875,153 @@ input:-webkit-autofill:active {
   background-color: rgba(var(--df-accent-primary-rgb), 0.7);
 }
 
-/* Features Section Styles */
-.features-section {
-  background-color: var(--df-bg-primary); /* Fondo oscuro consistente */
+/* Styles for Futuristic Project Cards on ProjectsListPage.jsx */
+.projects-list-page-styles-wrapper {
+  /* Variables CSS adaptadas de la referencia HTML, usando prefijo --plp- (Projects List Page) */
+  /* y colores de la paleta DevFlow */
+  --plp-primary-glow-color: var(--df-accent-primary); /* #63CEFF de DevFlow */
+  --plp-secondary-glow-color: var(--df-accent-secondary); /* #4A90E2 de DevFlow */
+  /* Para los colores RGB necesarios en box-shadow y text-shadow con opacidad */
+  --df-accent-primary-rgb: 99, 206, 255; /* RGB for #63CEFF */
+  --df-accent-secondary-rgb: 74, 144, 226; /* RGB for #4A90E2 */
+  --df-primary-rgb: 11, 28, 46; /* RGB for --df-primary (asumiendo #0B1C2E) */
+
+  --plp-card-background-color: rgba(var(--df-primary-rgb), 0.85); /* Fondo de tarjeta DevFlow oscuro translúcido */
+  --plp-card-border-color: var(--plp-primary-glow-color);
+  --plp-text-color-primary: var(--df-text-primary);
+  --plp-text-color-secondary: var(--df-text-secondary);
+  --plp-title-font: var(--font-family-headings); /* Fuente de títulos de DevFlow */
+  --plp-body-font: var(--font-family-sans-serif); /* Fuente de cuerpo de DevFlow */
+  --plp-arrow-width: 40px;
+  --plp-card-border-width: 2px;
 }
 
-.feature-card {
-  background-color: var(--df-bg-secondary);
-  border: 1px solid var(--df-accent-primary);
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(var(--df-accent-primary-rgb), 0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+/* Estilo para la columna que contiene cada tarjeta en la lista de proyectos */
+/* .projects-list-page-styles-wrapper .plist-card-column-wrapper {} */ /* Eliminado por estar vacío */
+
+.projects-list-page-styles-wrapper .project-card { /* Clase del HTML de referencia */
+  position: relative;
+  background-color: var(--plp-card-background-color);
+  backdrop-filter: blur(5px);
+  padding: 25px;
+  /* Ajusta el padding derecho para compensar el clip-path si es necesario, 
+       pero como el contenido está dentro de .card-content, puede no ser necesario aquí. */
+  clip-path: polygon(
+      0% 0%,
+      calc(100% - var(--plp-arrow-width)) 0%,
+      100% 50%,
+      calc(100% - var(--plp-arrow-width)) 100%,
+      0% 100%
+  );
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+  box-shadow:
+      0 0 0 var(--plp-card-border-width) var(--plp-card-border-color),
+      0 0 10px rgba(var(--df-accent-primary-rgb), 0.5),
+      0 0 20px rgba(var(--df-accent-secondary-rgb), 0.3) inset;
+  height: 230px; /* Altura fija de la tarjeta */
+  display: flex; /* Para controlar el contenido interno si es necesario */
+  flex-direction: column; /* Apila el contenido verticalmente */
+}
+
+.projects-list-page-styles-wrapper .project-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow:
+      0 0 0 var(--plp-card-border-width) var(--plp-primary-glow-color),
+      0 0 25px var(--plp-primary-glow-color),
+      0 0 40px rgba(var(--df-accent-secondary-rgb), 0.5) inset;
+}
+
+.projects-list-page-styles-wrapper .project-card::before,
+.projects-list-page-styles-wrapper .project-card::after {
+  content: '';
+  position: absolute;
+  transition: all 0.3s ease-out;
+  z-index: 0; /* Detrás del contenido */
+}
+
+/* Línea superior decorativa */
+.projects-list-page-styles-wrapper .project-card::before {
+  top: 10px;
+  left: 0;
+  width: 0; /* Se expande en hover */
+  height: var(--plp-card-border-width);
+  background-color: var(--plp-primary-glow-color);
+  box-shadow: 0 0 8px var(--plp-primary-glow-color);
+  opacity: 0.7;
+}
+
+.projects-list-page-styles-wrapper .project-card:hover::before {
+  width: 60px;
+}
+
+/* Detalle esquina inferior izquierda */
+.projects-list-page-styles-wrapper .project-card::after {
+  bottom: 10px;
+  left: 10px;
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+  border-left: var(--plp-card-border-width) solid var(--plp-secondary-glow-color);
+  border-bottom: var(--plp-card-border-width) solid var(--plp-secondary-glow-color);
+  opacity: 0.5;
+  transform: skewX(-20deg);
+  box-shadow: inset 1px 0 0 var(--plist-primary-glow-color), 
+              inset 0 -1px 0 var(--plist-primary-glow-color),
+              -2px 2px 12px rgba(var(--df-accent-secondary-rgb), 0.5);
+}
+
+.projects-list-page-styles-wrapper .project-card:hover::after {
+  opacity: 1;
+  border-left-width: calc(var(--plp-card-border-width) + 1px);
+  border-bottom-width: calc(var(--plp-card-border-width) + 1px);
+  box-shadow: inset 1px 0 0 var(--plist-primary-glow-color),
+              inset 0 -1px 0 var(--plist-primary-glow-color),
+              -5px 5px 20px rgba(var(--df-accent-secondary-rgb), 0.7);
+}
+
+.projects-list-page-styles-wrapper .project-card .card-content {
+  position: relative;
+  z-index: 1; /* Encima de los pseudo-elementos */
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* Alinea el contenido al inicio */
-  align-items: center; /* Centra el contenido horizontalmente */
+  height: 100%; /* Ocupa toda la altura de la tarjeta padre */
+  padding-right: calc(var(--plist-arrow-width) - 10px); /* Espacio para que el contenido no se solape con la flecha del clip-path */
+  overflow: hidden; /* Para que el ellipsis funcione en la descripción */
 }
 
-.feature-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 10px 25px rgba(var(--df-accent-primary-rgb), 0.3);
+.projects-list-page-styles-wrapper .project-card .card-title {
+  font-family: var(--plist-title-font);
+  font-size: 1.7em;
+  font-weight: 700;
+  color: var(--plist-primary-glow-color);
+  margin-top: 0;
+  margin-bottom: 10px; /* Reducido para dar más espacio a la descripción */
+  text-shadow: 0 0 8px rgba(var(--df-accent-primary-rgb), 0.7);
+  flex-shrink: 0; /* Evita que el título se encoja */
 }
 
-.feature-icon {
-  font-size: 3rem; /* Iconos más grandes */
-  color: var(--df-accent-primary);
-  margin-bottom: 1.5rem !important; /* Mayor separación */
-  line-height: 1; /* Asegurar que el icono no añada espacio extra */
+.projects-list-page-styles-wrapper .project-card .card-description {
+    font-family: var(--plist-body-font);
+    font-size: 0.9em;
+    line-height: 1.5; /* Ajustado para mejor legibilidad con ellipsis */
+    color: var(--plist-text-secondary-color);
+    margin-bottom: 0; /* Eliminado margen inferior para maximizar espacio */
+    flex-grow: 1; /* Ocupa el espacio vertical disponible */
+    overflow: hidden; /* Necesario para text-overflow */
+    text-overflow: ellipsis; /* Muestra puntos suspensivos si el texto es muy largo */
+    /* Para ellipsis en múltiples líneas */
+    display: -webkit-box;
+    -webkit-line-clamp: 4; /* Número de líneas a mostrar antes de truncar */
+    line-clamp: 4; /* Estándar */
+    -webkit-box-orient: vertical;
 }
 
-.feature-title {
-  color: var(--df-text-primary);
-  font-weight: 600;
-}
 
-.feature-description {
-  color: var(--df-text-secondary);
-  font-size: 0.9rem; /* Ligeramente más pequeño para descripciones */
+/* Eliminar estilos específicos de .plist-futuristic-card y sus hijos si ya no se usan directamente 
+   y se han reemplazado por .projects-list-page-styles-wrapper .project-card */
+
+/* Ya no se necesita un ruleset vacío para .plist-card-column-wrapper 
+.plist-card-column-wrapper {
 }
+*/
+
