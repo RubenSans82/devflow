@@ -77,10 +77,15 @@ const DashboardPage = () => {
           <Link to="/create-project">¡Crea tu primer proyecto!</Link>
         </div>
       ) : (
-        <div className="row">
-          {userProjects.map(project => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
+        <div className="projects-list-page-styles-wrapper"> {/* MODIFICADO el wrapper principal */}
+          <div className="row g-4"> {/* MODIFICADO para usar g-4 como en ProjectsListPage */}
+            {userProjects.map(project => (
+              // MODIFICADO: Clases de columna para coincidir con ProjectsListPage
+              <div key={project.id} className="col-12 col-md-6 col-lg-4 d-flex align-items-stretch plist-card-column-wrapper">
+                <ProjectCard project={project} displayContext="projectsList" /> {/* MODIFICADO: Añadida la prop displayContext */} 
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

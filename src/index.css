@@ -899,7 +899,8 @@ input:-webkit-autofill:active {
 /* Estilo para la columna que contiene cada tarjeta en la lista de proyectos */
 /* .projects-list-page-styles-wrapper .plist-card-column-wrapper {} */ /* Eliminado por estar vacío */
 
-.projects-list-page-styles-wrapper .project-card { /* Clase del HTML de referencia */
+.projects-list-page-styles-wrapper .project-card, /* AÑADIDO: selector para dashboard */
+.dashboard-page-styles-wrapper .project-card { /* Clase del HTML de referencia */
   position: relative;
   background-color: var(--plp-card-background-color);
   backdrop-filter: blur(5px);
@@ -918,12 +919,14 @@ input:-webkit-autofill:active {
       0 0 0 var(--plp-card-border-width) var(--plp-card-border-color),
       0 0 10px rgba(var(--df-accent-primary-rgb), 0.5),
       0 0 20px rgba(var(--df-accent-secondary-rgb), 0.3) inset;
-  height: 230px; /* Altura fija de la tarjeta */
+  height: 200px; /* Altura fija de la tarjeta MODIFICADA */
+  min-width: 350px; /* Ancho mínimo de la tarjeta AÑADIDO */
   display: flex; /* Para controlar el contenido interno si es necesario */
   flex-direction: column; /* Apila el contenido verticalmente */
 }
 
-.projects-list-page-styles-wrapper .project-card:hover {
+.projects-list-page-styles-wrapper .project-card:hover, /* AÑADIDO: selector para dashboard */
+.dashboard-page-styles-wrapper .project-card:hover {
   transform: translateY(-8px) scale(1.02);
   box-shadow:
       0 0 0 var(--plp-card-border-width) var(--plp-primary-glow-color),
@@ -931,8 +934,10 @@ input:-webkit-autofill:active {
       0 0 40px rgba(var(--df-accent-secondary-rgb), 0.5) inset;
 }
 
-.projects-list-page-styles-wrapper .project-card::before,
-.projects-list-page-styles-wrapper .project-card::after {
+.projects-list-page-styles-wrapper .project-card::before, /* AÑADIDO: selector para dashboard */
+.dashboard-page-styles-wrapper .project-card::before,
+.projects-list-page-styles-wrapper .project-card::after, /* AÑADIDO: selector para dashboard */
+.dashboard-page-styles-wrapper .project-card::after {
   content: '';
   position: absolute;
   transition: all 0.3s ease-out;
@@ -940,7 +945,8 @@ input:-webkit-autofill:active {
 }
 
 /* Línea superior decorativa */
-.projects-list-page-styles-wrapper .project-card::before {
+.projects-list-page-styles-wrapper .project-card::before, /* AÑADIDO: selector para dashboard */
+.dashboard-page-styles-wrapper .project-card::before {
   top: 10px;
   left: 0;
   width: 0; /* Se expande en hover */
@@ -950,12 +956,14 @@ input:-webkit-autofill:active {
   opacity: 0.7;
 }
 
-.projects-list-page-styles-wrapper .project-card:hover::before {
+.projects-list-page-styles-wrapper .project-card:hover::before, /* AÑADIDO: selector para dashboard */
+.dashboard-page-styles-wrapper .project-card:hover::before {
   width: 60px;
 }
 
 /* Detalle esquina inferior izquierda */
-.projects-list-page-styles-wrapper .project-card::after {
+.projects-list-page-styles-wrapper .project-card::after, /* AÑADIDO: selector para dashboard */
+.dashboard-page-styles-wrapper .project-card::after {
   bottom: 10px;
   left: 10px;
   width: 20px;
@@ -970,7 +978,8 @@ input:-webkit-autofill:active {
               -2px 2px 12px rgba(var(--df-accent-secondary-rgb), 0.5);
 }
 
-.projects-list-page-styles-wrapper .project-card:hover::after {
+.projects-list-page-styles-wrapper .project-card:hover::after, /* AÑADIDO: selector para dashboard */
+.dashboard-page-styles-wrapper .project-card:hover::after {
   opacity: 1;
   border-left-width: calc(var(--plp-card-border-width) + 1px);
   border-bottom-width: calc(var(--plp-card-border-width) + 1px);
@@ -979,7 +988,8 @@ input:-webkit-autofill:active {
               -5px 5px 20px rgba(var(--df-accent-secondary-rgb), 0.7);
 }
 
-.projects-list-page-styles-wrapper .project-card .card-content {
+.projects-list-page-styles-wrapper .project-card .card-content, /* AÑADIDO: selector para dashboard */
+.dashboard-page-styles-wrapper .project-card .card-content {
   position: relative;
   z-index: 1; /* Encima de los pseudo-elementos */
   display: flex;
@@ -989,7 +999,8 @@ input:-webkit-autofill:active {
   overflow: hidden; /* Para que el ellipsis funcione en la descripción */
 }
 
-.projects-list-page-styles-wrapper .project-card .card-title {
+.projects-list-page-styles-wrapper .project-card .card-title, /* AÑADIDO: selector para dashboard */
+.dashboard-page-styles-wrapper .project-card .card-title {
   font-family: var(--plist-title-font);
   font-size: 1.7em;
   font-weight: 700;
@@ -1000,7 +1011,8 @@ input:-webkit-autofill:active {
   flex-shrink: 0; /* Evita que el título se encoja */
 }
 
-.projects-list-page-styles-wrapper .project-card .card-description {
+.projects-list-page-styles-wrapper .project-card .card-description, /* AÑADIDO: selector para dashboard */
+.dashboard-page-styles-wrapper .project-card .card-description {
     font-family: var(--plist-body-font);
     font-size: 0.9em;
     line-height: 1.5; /* Ajustado para mejor legibilidad con ellipsis */
@@ -1015,13 +1027,4 @@ input:-webkit-autofill:active {
     line-clamp: 4; /* Estándar */
     -webkit-box-orient: vertical;
 }
-
-
-/* Eliminar estilos específicos de .plist-futuristic-card y sus hijos si ya no se usan directamente 
-   y se han reemplazado por .projects-list-page-styles-wrapper .project-card */
-
-/* Ya no se necesita un ruleset vacío para .plist-card-column-wrapper 
-.plist-card-column-wrapper {
-}
-*/
 
