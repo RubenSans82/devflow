@@ -73,7 +73,7 @@ const ProjectsListPage = () => {
     <div className="projects-list-page-styles-wrapper">
       <div className="container mt-5">
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h1>{currentUser ? 'Todos los Proyectos' : 'Proyectos Públicos'}</h1>
+          <h1 className="dashboard-title-tech">{currentUser ? 'Todos los Proyectos' : 'Proyectos Públicos'}</h1>
           {/* Botón de crear proyecto eliminado */}
         </div>
         

@@ -126,12 +126,12 @@ const EditProjectPage = () => {
 
 
   return (
-    <div className="container mt-5" style={{ maxWidth: '700px' }}>
-      <div className="card shadow">
-        <div className="card-header">
-          <h2>Editar Proyecto: {originalProject?.title}</h2>
-        </div>
-        <div className="card-body">
+    <div className="container mt-5">
+      {loading && <p>Cargando...</p>}
+      {error && <p className="text-danger">{error}</p>}
+      {originalProject && (
+        <>
+          <h2 className="mb-4 dashboard-title-tech">Editar Proyecto: {originalProject?.title}</h2>
           <form onSubmit={handleSubmit}>
             {/* Mostrar error de validación/actualización aquí */}
             {error && originalProject && <div className="alert alert-danger">{error}</div>}
@@ -166,8 +166,8 @@ const EditProjectPage = () => {
               </button>
             </div>
           </form>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 };

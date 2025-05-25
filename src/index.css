@@ -1287,5 +1287,66 @@ input:-webkit-autofill:active {
   transform: translate(0%, 250%); /* Ajustado: translateX de -50% a -100%, translateY de 50% a 180% */
 }
 
-/* ... rest of the radial menu styles ... */
+/* Estilo para el título del dashboard con aspecto tech */
+.dashboard-title-tech {
+  font-family: var(--font-family-headings); /* 'Poppins' */
+  font-weight: 700; /* Bold */
+  font-size: 2.5rem; /* Tamaño ajustado */
+  color: var(--df-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-shadow: 
+    0 0 5px var(--df-primary-glow),
+    0 0 10px var(--df-primary-glow),
+    0 0 15px var(--df-primary-neon-glow),
+    0 0 20px var(--df-primary-neon-glow);
+  /* Considerar añadir una animación sutil si se desea */
+}
+
+/* Nuevo estilo para subtítulos, basado en el dashboard-title-tech */
+.dashboard-title-tech-subtitle {
+  font-family: var(--font-family-headings);
+  font-weight: 600; /* Ligeramente menos peso */
+  font-size: 1.8rem; /* Tamaño reducido */
+  color: var(--df-text-primary);
+  /* text-transform: none; */ /* Permite minúsculas */
+  letter-spacing: 1px; /* Espaciado ligeramente menor */
+  text-shadow: 
+    0 0 3px var(--df-primary-glow), 
+    0 0 6px var(--df-primary-glow), 
+    0 0 9px var(--df-primary-neon-glow), 
+    0 0 12px var(--df-primary-neon-glow); /* Sombra reducida */
+  /* Si se desea mantener mayúsculas como el título principal, añadir: */
+  text-transform: uppercase;
+}
+
+/* Estilos para el Botón de Acción Flotante (FAB) */
+.fab-mobile {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  background-color: var(--df-accent-primary);
+  border-radius: 50%;
+  display: flex; /* Para centrar el icono */
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19);
+  z-index: 1030; /* Asegurar que esté por encima de otro contenido */
+  color: white; /* Color del icono */
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  text-decoration: none; /* Quitar subrayado si es un Link */
+}
+
+.fab-mobile:hover {
+  transform: scale(1.1);
+  background-color: var(--df-primary-darker); /* Un tono más oscuro al pasar el ratón */
+  color: white; /* Asegurar que el color del icono se mantenga */
+}
+
+.fab-mobile i { /* Estilo para el icono dentro del FAB */
+  font-size: 1.5rem; /* Tamaño del icono */
+  line-height: 1; /* Para asegurar alineación vertical del icono */
+}
 

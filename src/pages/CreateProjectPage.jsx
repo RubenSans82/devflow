@@ -77,10 +77,11 @@ const CreateProjectPage = () => {
   };
 
   return (
-    <div className="container mt-5" style={{ maxWidth: '700px' }}>
+    <div className="container mt-5">
+      <h2 className="mb-4 dashboard-title-tech">Crear Nuevo Proyecto</h2>
       <div className="card">
         <div className="card-header">
-          <h2>Crear Nuevo Proyecto</h2>
+          
         </div>
         <div className="card-body">
           <form onSubmit={handleSubmit}>

@@ -1,8 +1,8 @@
 // src/pages/DashboardPage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; // useEffect añadido
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { getUserProjects } from '../services/firestore'; // Importar función para obtener proyectos del usuario
+import { getUserProjects, getUserDocument } from '../services/firestore'; // getUserDocument añadido
 import ProjectCard from '../components/ProjectCard'; // Importar ProjectCard
 
 const DashboardPage = () => {
@@ -11,6 +11,38 @@ const DashboardPage = () => {
   const [userProjects, setUserProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [errorProjects, setErrorProjects] = useState('');
+  const [userProfileData, setUserProfileData] = useState(null); // Nuevo estado para perfil
+  const [loadingProfile, setLoadingProfile] = useState(true); // Nuevo estado de carga para perfil
+
+  useEffect(() => {
+    if (currentUser?.uid) {
+      const fetchUserProfile = async () => {
+        setLoadingProfile(true);
+        try {
+          const userDoc = await getUserDocument(currentUser.uid);
+          if (userDoc) {
+            setUserProfileData(userDoc);
+          } else {
+            // Usar datos de currentUser como fallback si no hay documento en Firestore
+            setUserProfileData({ 
+              displayName: currentUser.displayName,
+              email: currentUser.email
+              // githubUsername no estaría disponible aquí directamente
+            });
+          }
+        } catch (error) {
+          console.error("Error al cargar datos del perfil desde Firestore:", error);
+          // Fallback a datos de currentUser en caso de error
+          setUserProfileData({ 
+            displayName: currentUser.displayName,
+            email: currentUser.email
+          });
+        }
+        setLoadingProfile(false);
+      };
+      fetchUserProfile();
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     if (currentUser) {
@@ -47,6 +79,11 @@ const DashboardPage = () => {
     return null; 
   }
 
+  // Determinar el nombre a mostrar
+  const displayName = loadingProfile 
+    ? 'Cargando...' 
+    : userProfileData?.githubUsername || userProfileData?.displayName || currentUser.email;
+
   const handleRadialAction = (action, projectId) => {
     console.log(`Dashboard action: ${action}, for project ID: ${projectId}`);
     // Lógica para manejar cada acción
@@ -76,20 +113,29 @@ const DashboardPage = () => {
 
   return (
     <div className="container mt-5">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>Dashboard de {currentUser.displayName || currentUser.email}</h1>
-        {/* Botones de Ver Perfil y Cerrar Sesión eliminados */}
-      </div>
-
-      <div className="mb-4 p-3 rounded">
-        <p className="lead">Bienvenido/a a tu panel de control. Aquí puedes gestionar tus proyectos y ver las últimas actualizaciones.</p>
-        <Link to="/create-project" className="btn btn-outline-primary btn-pulse-glow">
+      <div className="d-flex justify-content-between align-items-center mb-5">
+        <h1 className="dashboard-title-tech">Dashboard de {displayName}</h1>
+        {/* Botón Crear Nuevo Proyecto para escritorio, alineado a la derecha del título principal */}
+        <Link to="/create-project" className="btn btn-outline-primary btn-pulse-glow d-none d-md-inline-block"> 
           <i className="bi bi-plus-circle-fill me-2"></i>Crear Nuevo Proyecto
         </Link>
       </div>
 
-      
-      <h2>Mis Proyectos</h2>
+      {/* Título "Mis Proyectos" para escritorio (ahora solo el título) */}
+      <div className="d-none d-md-block mt-5 mb-4"> 
+        <h2 className="dashboard-title-tech-subtitle">Mis Proyectos</h2>
+      </div>
+
+      {/* Título "Mis Proyectos" para móviles (sin el botón al lado) */}
+      <div className="d-md-none mt-5 mb-4"> {/* mt-5 añadido, mb-3 cambiado a mb-4 */}
+        <h2 className="dashboard-title-tech-subtitle">Mis Proyectos</h2>
+      </div>
+
+      {/* Botón de Acción Flotante (FAB) para móviles */}
+      <Link to="/create-project" className="fab-mobile d-md-none"> {/* Visible solo en móviles (d-md-none) */}
+        <i className="bi bi-plus-lg"></i> {/* Icono más grande para FAB */}
+      </Link>
+
       {loadingProjects ? (
         <div className="text-center">
           <div className="spinner-border text-primary" role="status">

@@ -103,7 +103,7 @@ const UserProfilePage = () => {
     <div className="container profile-page-container"> {/* Eliminado py-5, el padding vertical se maneja en CSS */}
       <div className="card profile-card"> {/* .profile-card ya tiene max-width: 600px desde CSS */}
         <div className="card-header">
-          <h2>Perfil de Usuario</h2>
+          <h2 className="mb-0 dashboard-title-tech">Perfil de Usuario</h2>
         </div>
         <div className="card-body text-center">
           {photoURLToShow && (

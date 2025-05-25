@@ -402,42 +402,50 @@ const ProjectDetailPage = () => {
         <div className="alert alert-danger" role="alert">
           <h4>Error</h4>
           <p>{error}</p>
-          <Link to="/projects" className="btn btn-primary">Volver a Proyectos</Link>
+          <Link to="/dashboard" className="btn btn-primary">Volver al Dashboard</Link>
         </div>
       </div>
     );
   }
 
   if (!project) {
-    // Esto podría ocurrir si el proyecto no se encuentra después de la carga inicial
-    // o si el error no se estableció correctamente.
     return (
       <div className="container mt-5">
         <div className="alert alert-warning" role="alert">
-          {error ? error : "Proyecto no encontrado."}
-          <Link to="/projects" className="btn btn-info ms-3">Volver a Proyectos</Link>
+          Proyecto no encontrado.
+          <Link to="/dashboard" className="btn btn-primary ms-3">Volver al Dashboard</Link>
         </div>
       </div>
     );
   }
 
-  // Verificar si el proyecto es privado y el usuario no es el propietario
-  if (!project.isPublic && (!currentUser || project.ownerId !== currentUser.uid)) {
-    return (
-      <div className="container mt-5">
-        <div className="alert alert-warning" role="alert">
-          Este proyecto es privado y no tienes permiso para verlo.
-        </div>
-        <Link to="/projects" className="btn btn-primary">Volver a la lista de proyectos</Link>
-      </div>
-    );
-  }
+  // Determinar si el usuario actual es el propietario o un colaborador
+  const isOwner = currentUser && project.ownerId === currentUser.uid;
+  const isCollaborator = currentUser && project.collaborators && project.collaborators.includes(currentUser.uid);
+  const canEdit = isOwner || isCollaborator; // Asumimos que los colaboradores pueden editar (esto puede ajustarse)
+  const canManageCollaborators = isOwner; // Solo el propietario puede gestionar colaboradores
 
   return (
-    <div className="container mt-5">
-      <div className="card shadow-lg mb-4">
-        <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-          <h1 className="mb-0">{project.title}</h1>
+    <div className="container mt-5 project-detail-page">
+      <div className="row mb-4">
+        <div className="col-md-8">
+          <h1 className="dashboard-title-tech">{project.title}</h1>
+          <p className="text-muted">Creado por: {project.ownerName || project.ownerId}</p>
+          {project.client && <p className="mb-1"><strong>Cliente:</strong> {project.client}</p>}
+          {project.deadline && (
+            <p className="mb-1">
+              <strong>Fecha Límite:</strong> 
+              {new Date(project.deadline.seconds * 1000).toLocaleDateString()}
+            </p>
+          )}
+          <span className={`badge bg-${project.isPublic ? 'success' : 'secondary'} me-2`}>
+            {project.isPublic ? 'Público' : 'Privado'}
+          </span>
+          <span className={`badge bg-${project.status === 'activo' ? 'primary' : project.status === 'completado' ? 'success' : 'warning'}`}>
+            Estado: {project.status}
+          </span>
+        </div>
+        <div className="col-md-4 text-md-end">
           {currentUser && currentUser.uid === project.ownerId && (
             <button 
               onClick={() => setShowCreateTaskForm(!showCreateTaskForm)} 
@@ -448,6 +456,8 @@ const ProjectDetailPage = () => {
             </button>
           )}
         </div>
+      </div>
+      <div className="card shadow-lg mb-4">
         <div className="card-body">
           <p className="card-text"><strong>Descripción:</strong> {project.description}</p>
           <p className="card-text">
