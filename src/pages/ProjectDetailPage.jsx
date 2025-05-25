@@ -26,16 +26,19 @@ const ProjectDetailPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Estados para el formulario de añadir colaborador
+  const [showAddCollaboratorForm, setShowAddCollaboratorForm] = useState(false);
+  const [collaboratorEmail, setCollaboratorEmail] = useState('');
+  const [collaboratorError, setCollaboratorError] = useState('');
+  const [collaboratorSuccess, setCollaboratorSuccess] = useState('');
+
   const [showCreateTaskForm, setShowCreateTaskForm] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [newTaskAssignedTo, setNewTaskAssignedTo] = useState(''); // Nuevo estado para assignedTo en nueva tarea
   const [users, setUsers] = useState([]); // Lista de usuarios para el selector
   const [taskError, setTaskError] = useState('');
-  const [collaboratorEmail, setCollaboratorEmail] = useState(''); // Para el input de añadir colaborador
-  const [collaboratorError, setCollaboratorError] = useState(''); // Para errores al añadir colaborador
-  const [collaboratorSuccess, setCollaboratorSuccess] = useState(''); // Para mensajes de éxito al añadir colaborador
-
+  
   const [editingTask, setEditingTask] = useState(null); 
   const [showEditTaskModal, setShowEditTaskModal] = useState(false); // Estado para el modal de edición
 
@@ -385,298 +388,211 @@ const ProjectDetailPage = () => {
     setShowConfirmationModal(true);
   };
 
-  if (loading) {
-    return (
-      <div className="container mt-5 text-center">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Cargando...</span>
-        </div>
-        <p className="mt-2">Cargando detalles del proyecto...</p>
-      </div>
-    );
-  }
+  if (loading) return <div className="container mt-5"><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando...</span></div></div>;
+  if (error) return <div className="container mt-5"><div className="alert alert-danger">Error: {error}</div></div>;
+  if (!project) return <div className="container mt-5"><div className="alert alert-warning">Proyecto no encontrado.</div></div>;
 
-  if (error) {
-    return (
-      <div className="container mt-5">
-        <div className="alert alert-danger" role="alert">
-          <h4>Error</h4>
-          <p>{error}</p>
-          <Link to="/dashboard" className="btn btn-primary">Volver al Dashboard</Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (!project) {
-    return (
-      <div className="container mt-5">
-        <div className="alert alert-warning" role="alert">
-          Proyecto no encontrado.
-          <Link to="/dashboard" className="btn btn-primary ms-3">Volver al Dashboard</Link>
-        </div>
-      </div>
-    );
-  }
-
-  // Determinar si el usuario actual es el propietario o un colaborador
-  const isOwner = currentUser && project.ownerId === currentUser.uid;
-  const isCollaborator = currentUser && project.collaborators && project.collaborators.includes(currentUser.uid);
-  const canEdit = isOwner || isCollaborator; // Asumimos que los colaboradores pueden editar (esto puede ajustarse)
-  const canManageCollaborators = isOwner; // Solo el propietario puede gestionar colaboradores
+  const isOwner = currentUser && project && project.ownerId === currentUser.uid;
+  const isCollaborator = currentUser && project && project.collaborators && project.collaborators.includes(currentUser.uid);
+  const canManageProject = isOwner; // Solo el propietario puede editar/eliminar proyecto y gestionar colaboradores
+  const canCreateTasks = isOwner || isCollaborator; // Propietario y colaboradores pueden crear tareas
+  const canManageTasks = isOwner || isCollaborator; // Propietario y colaboradores pueden editar/eliminar tareas
 
   return (
-    <div className="container mt-5 project-detail-page">
-      <div className="row mb-4">
-        <div className="col-md-8">
-          <h1 className="dashboard-title-tech">{project.title}</h1>
-          <p className="text-muted">Creado por: {project.ownerName || project.ownerId}</p>
-          {project.client && <p className="mb-1"><strong>Cliente:</strong> {project.client}</p>}
-          {project.deadline && (
-            <p className="mb-1">
-              <strong>Fecha Límite:</strong> 
-              {new Date(project.deadline.seconds * 1000).toLocaleDateString()}
-            </p>
-          )}
-          <span className={`badge bg-${project.isPublic ? 'success' : 'secondary'} me-2`}>
-            {project.isPublic ? 'Público' : 'Privado'}
-          </span>
-          <span className={`badge bg-${project.status === 'activo' ? 'primary' : project.status === 'completado' ? 'success' : 'warning'}`}>
-            Estado: {project.status}
-          </span>
-        </div>
-        <div className="col-md-4 text-md-end">
-          {currentUser && currentUser.uid === project.ownerId && (
-            <button 
-              onClick={() => setShowCreateTaskForm(!showCreateTaskForm)} 
-              className="btn btn-light btn-sm"
-            >
-              <i className={`bi ${showCreateTaskForm ? 'bi-x-lg' : 'bi-plus-lg'} me-1`}></i> 
-              {showCreateTaskForm ? 'Cancelar' : 'Añadir Tarea'}
+    <div className="container mt-5">
+      {/* Título y Botones de Acción del Proyecto */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1 className="dashboard-title-tech">{project.title}</h1>
+        {canManageProject && (
+          <div>
+            <Link to={`/edit-project/${projectId}`} className="btn btn-outline-primary me-2">
+              <i className="bi bi-pencil-square me-1"></i> Editar Proyecto
+            </Link>
+            <button onClick={handleDelete} className="btn btn-outline-danger">
+              <i className="bi bi-trash me-1"></i> Eliminar Proyecto
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-      <div className="card shadow-lg mb-4">
+
+      {/* Tarjeta de Detalles del Proyecto */}
+      <div className="card mb-4">
         <div className="card-body">
+          <h5 className="card-title dashboard-title-tech-subtitle">Detalles del Proyecto</h5>
           <p className="card-text"><strong>Descripción:</strong> {project.description}</p>
           <p className="card-text">
-            <strong>Repositorio GitHub:</strong> 
-            <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="ms-2">{project.githubLink}</a>
+            <strong>Enlace GitHub:</strong> 
+            <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="ms-2">
+              {project.githubLink}
+            </a>
           </p>
-          <p className="card-text">
-            <strong>Visibilidad:</strong> {project.isPublic ? 'Público' : 'Privado'}
-          </p>
+          <p className="card-text"><strong>Visibilidad:</strong> {project.isPublic ? 'Público' : 'Privado'}</p>
+          <p className="card-text"><strong>Propietario:</strong> {project.ownerName || project.ownerId}</p>
+          {project.collaboratorNames && project.collaboratorNames.length > 0 && (
+            <p className="card-text"><strong>Colaboradores:</strong> {project.collaboratorNames.join(', ')}</p>
+          )}
           <p className="card-text">
             <small className="text-muted">
-              Creado: {project.createdAt?.toDate().toLocaleDateString()} a las {project.createdAt?.toDate().toLocaleTimeString()}
+              Creado: {project.createdAt ? new Date(project.createdAt.seconds * 1000).toLocaleDateString() : 'Fecha no disponible'} - 
+              Actualizado: {project.updatedAt ? new Date(project.updatedAt.seconds * 1000).toLocaleDateString() : 'Fecha no disponible'}
             </small>
           </p>
-          {project.updatedAt && (
-            <p className="card-text">
-              <small className="text-muted">
-                Última actualización: {project.updatedAt?.toDate().toLocaleDateString()} a las {project.updatedAt?.toDate().toLocaleTimeString()}
-              </small>
-            </p>
-          )}
-
-          {/* Aquí iría la gestión de tareas y colaboradores más adelante */} 
-
-          {currentUser && currentUser.uid === project.ownerId && (
-            <div className="mt-4 border-top pt-3">
-              <Link to={`/project/edit/${project.id}`} className="btn btn-outline-secondary me-2 mb-2">
-                <i className="bi bi-pencil-square me-1"></i> Editar Proyecto
-              </Link>
-              <button onClick={handleDelete} className="btn btn-outline-danger me-2 mb-2">
-                <i className="bi bi-trash me-1"></i> Eliminar Proyecto
-              </button>
-            </div>
-          )}
-        </div>
-        <div className="card-footer text-muted">
-          ID del Propietario: {project.ownerId}
         </div>
       </div>
 
-      {/* Sección para el Formulario de Crear Tarea */}
-      {showCreateTaskForm && currentUser && currentUser.uid === project.ownerId && (
-        <div className="card shadow-sm mb-4">
-          <div className="card-header">
-            <h5 className="mb-0">Crear Nueva Tarea</h5>
-          </div>
+      {/* Sección de Colaboradores (Solo para el propietario) */}
+      {canManageProject && (
+        <div className="card mb-4">
           <div className="card-body">
-            <form onSubmit={handleCreateTask} className="mt-3 p-3 border rounded bg-light shadow-sm">
-              <div className="mb-3">
-                <label htmlFor="newTaskTitle" className="form-label">Título de la Tarea <span className="text-danger">*</span></label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="newTaskTitle"
-                  value={newTaskTitle}
-                  onChange={(e) => setNewTaskTitle(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="newTaskDescription" className="form-label">Descripción de la Tarea</label>
-                <textarea
-                  className="form-control"
-                  id="newTaskDescription"
-                  rows="3"
-                  value={newTaskDescription}
-                  onChange={(e) => setNewTaskDescription(e.target.value)}
-                ></textarea>
-              </div>
-              {/* Selector para Asignar Tarea */}
-              <div className="mb-3">
-                <label htmlFor="newTaskAssignedTo" className="form-label">Asignar a</label>
-                <select 
-                  id="newTaskAssignedTo" 
-                  className="form-select" 
-                  value={newTaskAssignedTo} 
-                  onChange={(e) => setNewTaskAssignedTo(e.target.value)}
-                >
-                  <option value="">Sin asignar</option>
-                  {users.map(user => (
-                    <option key={user.id} value={user.id}>
-                      {user.displayName || user.email} (ID: {user.id.substring(0,6)})
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <h5 className="card-title dashboard-title-tech-subtitle">Gestionar Colaboradores</h5>
+            {collaboratorSuccess && <div className="alert alert-success">{collaboratorSuccess}</div>}
+            {collaboratorError && <div className="alert alert-danger">{collaboratorError}</div>}
+            
+            {!showAddCollaboratorForm ? (
+              <button className="btn btn-primary mb-3" onClick={() => setShowAddCollaboratorForm(true)}>
+                <i className="bi bi-person-plus-fill me-2"></i>Añadir Colaborador
+              </button>
+            ) : (
+              <form onSubmit={handleAddCollaborator} className="mb-3">
+                <div className="row g-2">
+                  <div className="col-md">
+                    <input 
+                      type="email" 
+                      className="form-control" 
+                      placeholder="Email del colaborador" 
+                      value={collaboratorEmail} 
+                      onChange={(e) => setCollaboratorEmail(e.target.value)} 
+                      required 
+                    />
+                  </div>
+                  <div className="col-md-auto">
+                    <button type="submit" className="btn btn-success me-2">
+                      <i className="bi bi-check-circle me-1"></i> Guardar
+                    </button>
+                    <button type="button" className="btn btn-secondary" onClick={() => { setShowAddCollaboratorForm(false); setCollaboratorEmail(''); setCollaboratorError(''); }}>
+                      <i className="bi bi-x-circle me-1"></i> Cancelar
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
 
-              {taskError && <div className="alert alert-danger mt-2">{taskError}</div>}
-              <div className="d-flex justify-content-end">
-                <button type="submit" className="btn btn-primary">
-                  <i className="bi bi-plus-circle me-1"></i> Crear Tarea
-                </button>
-              </div>
-            </form>
+            {project.collaborators && project.collaborators.length > 0 ? (
+              <ul className="list-group">
+                {project.collaborators.map((collabId, index) => (
+                  <li key={collabId} className="list-group-item d-flex justify-content-between align-items-center">
+                    {project.collaboratorNames && project.collaboratorNames[index] ? project.collaboratorNames[index] : collabId}
+                    <button 
+                      className="btn btn-sm btn-outline-danger" 
+                      onClick={() => handleRemoveCollaborator(collabId)}
+                    >
+                      <i className="bi bi-person-dash-fill"></i>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No hay colaboradores en este proyecto.</p>
+            )}
           </div>
         </div>
       )}
 
-      {/* Sección para mostrar Tareas */}
-      <div className="card shadow-sm">
-        <div className="card-header">
-          <h5 className="mb-0">Tareas del Proyecto</h5>
-        </div>
+      {/* Sección de Tareas */}
+      <div className="card mb-4">
         <div className="card-body">
-          {loading && <p>Cargando tareas...</p>}
-          {!loading && tasks.length === 0 && !error && ( // Mostrar si no hay tareas y no hay error general
-            <p className="text-muted">No hay tareas para este proyecto todavía. ¡Crea la primera!</p>
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h5 className="card-title dashboard-title-tech-subtitle">Tareas del Proyecto</h5>
+            {canCreateTasks && !showCreateTaskForm && (
+              <button className="btn btn-primary" onClick={() => { setShowCreateTaskForm(true); setTaskError(''); }}>
+                <i className="bi bi-plus-circle-fill me-2"></i>Crear Nueva Tarea
+              </button>
+            )}
+          </div>
+
+          {taskError && <div className="alert alert-danger">{taskError}</div>}
+
+          {showCreateTaskForm && (
+            <div className="card mb-3">
+              <div className="card-body">
+                <h6 className="card-title">Nueva Tarea</h6>
+                <form onSubmit={handleCreateTask}>
+                  <div className="mb-3">
+                    <label htmlFor="newTaskTitle" className="form-label">Título <span className="text-danger">*</span></label>
+                    <input type="text" className="form-control" id="newTaskTitle" value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="newTaskDescription" className="form-label">Descripción</label>
+                    <textarea className="form-control" id="newTaskDescription" rows="3" value={newTaskDescription} onChange={(e) => setNewTaskDescription(e.target.value)}></textarea>
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="newTaskAssignedTo" className="form-label">Asignar a</label>
+                    <select className="form-select" id="newTaskAssignedTo" value={newTaskAssignedTo} onChange={(e) => setNewTaskAssignedTo(e.target.value)}>
+                      <option value="">Sin asignar</option>
+                      {users.map(user => (
+                        <option key={user.id} value={user.id}>{user.displayName || user.email}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <button type="submit" className="btn btn-success me-2">
+                    <i className="bi bi-check-circle me-1"></i> Guardar Tarea
+                  </button>
+                  <button type="button" className="btn btn-secondary" onClick={() => { setShowCreateTaskForm(false); setTaskError(''); }}>
+                    <i className="bi bi-x-circle me-1"></i> Cancelar
+                  </button>
+                </form>
+              </div>
+            </div>
           )}
-          {/* {!loading && error && <div className="alert alert-danger">{error}</div>} */} {/* Error general ya se muestra arriba */}
-          {tasks.length > 0 && (
-            <ul className="list-group list-group-flush">
+
+          {tasks.length > 0 ? (
+            <ul className="list-group">
               {tasks.map(task => (
                 <TaskItem 
                   key={task.id} 
                   task={task} 
-                  projectOwnerId={project.ownerId}
-                  onStatusChange={handleTaskStatusChange}
-                  onEdit={handleEditTask}
-                  onDelete={handleDeleteTask}
+                  onStatusChange={handleTaskStatusChange} 
+                  onEdit={canManageTasks ? () => handleEditTask(task) : undefined} 
+                  onDelete={canManageTasks ? () => handleDeleteTask(task.id) : undefined} 
+                  users={users} // Pasar la lista de usuarios
+                  canManage={canManageTasks} // Pasar la capacidad de gestión
                 />
               ))}
             </ul>
+          ) : (
+            <p>No hay tareas para este proyecto.</p>
           )}
         </div>
       </div>
 
-      {/* Mostrar Colaboradores */}
-      {project.collaborators && project.collaborators.length > 0 && (
-        <div className="card shadow-sm mb-4">
-          <div className="card-header">
-            <h5 className="mb-0">Colaboradores del Proyecto</h5>
-          </div>
-          <div className="card-body">
-            <ul className="list-group list-group-flush">
-              {project.collaborators.map(collabId => {
-                const collaborator = users.find(u => u.id === collabId);
-                return (
-                  <li key={collabId} className="list-group-item d-flex justify-content-between align-items-center ps-0">
-                    {collaborator ? (
-                      <>
-                        <Link to={`/profile/${collaborator.id}`}>{collaborator.displayName || collaborator.email}</Link>
-                        {currentUser && project.ownerId === currentUser.uid && (
-                          <button 
-                            onClick={() => handleRemoveCollaborator(collabId)} 
-                            className="btn btn-outline-danger btn-sm"
-                            title="Eliminar colaborador"
-                          >
-                            <i className="bi bi-person-dash"></i>
-                          </button>
-                        )}
-                      </>
-                    ) : (
-                      <span>ID: {collabId} (cargando...)</span>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </div>
+      {editingTask && showEditTaskModal && (
+        <EditTaskModal 
+          show={showEditTaskModal} 
+          onHide={handleCloseEditModal} 
+          task={editingTask} 
+          onSave={handleUpdateTask} 
+          users={users} // Pasar la lista de usuarios al modal de edición
+        />
       )}
 
-      {/* Formulario para Añadir Colaborador (solo para el propietario) */}
-      {currentUser && project.ownerId === currentUser.uid && (
-        <div className="card shadow-sm mb-4">
-          <div className="card-header">
-            <h5 className="mb-0">Añadir Colaborador</h5>
-          </div>
-          <div className="card-body">
-            <form onSubmit={handleAddCollaborator}>
-              <div className="mb-3">
-                <label htmlFor="collaboratorEmail" className="form-label">Email del Colaborador</label>
-                <input 
-                  type="email" 
-                  className="form-control" 
-                  id="collaboratorEmail" 
-                  value={collaboratorEmail} 
-                  onChange={(e) => setCollaboratorEmail(e.target.value)} 
-                  placeholder="ejemplo@dominio.com"
-                />
-              </div>
-              {collaboratorError && <div className="alert alert-danger">{collaboratorError}</div>}
-              {collaboratorSuccess && <div className="alert alert-success">{collaboratorSuccess}</div>}
-              <button type="submit" className="btn btn-info">
-                <i className="bi bi-person-plus me-1"></i> Añadir Colaborador
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Confirmación/Notificación */}
-      <ConfirmationModal 
-        isOpen={showConfirmationModal}
-        onClose={() => {
+      <ConfirmationModal
+        show={showConfirmationModal}
+        onHide={() => {
           setShowConfirmationModal(false);
-          // Si hay una función onClose específica en la config (como para el handleDelete), llamarla
-          if (confirmationModalConfig.onClose) {
-            confirmationModalConfig.onClose();
-          }
+          // Si el modal era para una acción que redirige (ej. eliminar proyecto y luego OK),
+          // y el usuario cierra con X, la redirección no ocurrirá.
+          // Esto es generalmente aceptable, pero se podría manejar si es necesario.
         }}
-        onConfirm={confirmationModalConfig.onConfirm}
         title={confirmationModalConfig.title}
-        message={confirmationModalConfig.message}
+        body={confirmationModalConfig.message}
+        onConfirm={confirmationModalConfig.onConfirm}
         confirmText={confirmationModalConfig.confirmText}
         cancelText={confirmationModalConfig.cancelText}
         showCancelButton={confirmationModalConfig.showCancelButton}
         confirmButtonClass={confirmationModalConfig.confirmButtonClass}
       />
 
-      {/* Modal de Edición de Tarea */}
-      {showEditTaskModal && editingTask && (
-        <EditTaskModal 
-          task={editingTask}
-          isOpen={showEditTaskModal}
-          onClose={handleCloseEditModal}
-          onSubmit={handleUpdateTask}
-        />
-      )}
+      <Link to="/dashboard" className="btn btn-link mt-3"><i className="bi bi-arrow-left-circle me-2"></i>Volver al Dashboard</Link>
     </div>
   );
 };

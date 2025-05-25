@@ -1,6 +1,6 @@
 // src/pages/CreateProjectPage.jsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Importar useNavigate
+import { useNavigate, Link } from 'react-router-dom'; // Importar useNavigate y Link
 import { createNewProject } from '../services/firestore'; // Importar función de Firestore
 import { useAuth } from '../contexts/AuthContext'; // Importar hook de autenticación
 import ConfirmationModal from '../components/ConfirmationModal'; // Importar ConfirmationModal
@@ -78,39 +78,41 @@ const CreateProjectPage = () => {
 
   return (
     <div className="container mt-5">
-      <h2 className="mb-4 dashboard-title-tech">Crear Nuevo Proyecto</h2>
-      <div className="card">
-        <div className="card-header">
-          
-        </div>
-        <div className="card-body">
-          <form onSubmit={handleSubmit}>
-            {error && <div className="alert alert-danger">{error}</div>}
-            <div className="mb-3">
-              <label htmlFor="title" className="form-label">Título del Proyecto <span className="text-danger">*</span></label>
-              <input type="text" className="form-control" id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+      <div className="row justify-content-center"> {/* Centrar el contenido */}
+        <div className="col-md-8 col-lg-6"> {/* Controlar el ancho del formulario y ahora también el enlace de volver */}
+          <h2 className="mb-4 dashboard-title-tech text-center">Crear Nuevo Proyecto</h2> {/* Centrar título */}
+          <div className="card">
+            <div className="card-body">
+              <form onSubmit={handleSubmit}>
+                {error && <div className="alert alert-danger">{error}</div>}
+                <div className="mb-3">
+                  <label htmlFor="title" className="form-label">Título del Proyecto <span className="text-danger">*</span></label>
+                  <input type="text" className="form-control" id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="description" className="form-label">Descripción <span className="text-danger">*</span></label>
+                  <textarea className="form-control" id="description" rows="4" value={description} onChange={(e) => setDescription(e.target.value)} ></textarea>
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="githubLink" className="form-label">Enlace al Repositorio de GitHub <span className="text-danger">*</span></label>
+                  <input type="url" className="form-control" id="githubLink" value={githubLink} onChange={(e) => setGithubLink(e.target.value)} placeholder="https://github.com/usuario/repo"/>
+                </div>
+                <div className="mb-3 form-check">
+                  <input type="checkbox" className="form-check-input" id="isPublic" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
+                  <label className="form-check-label" htmlFor="isPublic">Hacer este proyecto público</label>
+                </div>
+                <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                      <span className="ms-2">Creando Proyecto...</span>
+                    </>
+                  ) : 'Crear Proyecto'}
+                </button>
+              </form>
             </div>
-            <div className="mb-3">
-              <label htmlFor="description" className="form-label">Descripción <span className="text-danger">*</span></label>
-              <textarea className="form-control" id="description" rows="4" value={description} onChange={(e) => setDescription(e.target.value)} ></textarea>
-            </div>
-            <div className="mb-3">
-              <label htmlFor="githubLink" className="form-label">Enlace al Repositorio de GitHub <span className="text-danger">*</span></label>
-              <input type="url" className="form-control" id="githubLink" value={githubLink} onChange={(e) => setGithubLink(e.target.value)} placeholder="https://github.com/usuario/repo"/>
-            </div>
-            <div className="mb-3 form-check">
-              <input type="checkbox" className="form-check-input" id="isPublic" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
-              <label className="form-check-label" htmlFor="isPublic">Hacer este proyecto público</label>
-            </div>
-            <button type="submit" className="btn btn-primary w-100" disabled={loading}>
-              {loading ? (
-                <>
-                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  <span className="ms-2">Creando Proyecto...</span>
-                </>
-              ) : 'Crear Proyecto'}
-            </button>
-          </form>
+          </div>
+          <Link to="/dashboard" className="btn btn-link mt-4 mb-5 d-block text-start"><i className="bi bi-arrow-left-circle me-2"></i>Volver al Dashboard</Link>
         </div>
       </div>
       <ConfirmationModal
@@ -122,6 +124,7 @@ const CreateProjectPage = () => {
         confirmText="OK"
         cancelText={null} // Oculta el botón de cancelar
       />
+      {/* El enlace se movió arriba, dentro de la columna del formulario */}
     </div>
   );
 };
