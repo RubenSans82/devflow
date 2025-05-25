@@ -83,7 +83,7 @@ const DashboardPage = () => {
 
       <div className="mb-4 p-3 rounded">
         <p className="lead">Bienvenido/a a tu panel de control. Aquí puedes gestionar tus proyectos y ver las últimas actualizaciones.</p>
-        <Link to="/create-project" className="btn btn-success">
+        <Link to="/create-project" className="btn btn-outline-primary btn-pulse-glow">
           <i className="bi bi-plus-circle-fill me-2"></i>Crear Nuevo Proyecto
         </Link>
       </div>

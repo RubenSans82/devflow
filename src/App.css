@@ -40,3 +40,21 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Nueva clase para el efecto de resplandor en botones */
+.btn-pulse-glow {
+  box-shadow: 0 0 15px 5px rgba(0, 123, 255, 0.5); /* Sombra azul inicial */
+  animation: pulse-glow 2s infinite alternate; /* Animación de resplandor */
+}
+
+/* La animación @keyframes pulse-glow ya debería estar definida en este archivo,
+   si no lo está, deberíamos añadirla también. Asumiendo que está de la vez anterior:
+@keyframes pulse-glow {
+  from {
+    box-shadow: 0 0 15px 5px rgba(0, 123, 255, 0.5);
+  }
+  to {
+    box-shadow: 0 0 30px 10px rgba(0, 123, 255, 0.75), 0 0 10px 3px rgba(100, 180, 255, 0.5);
+  }
+}
+*/

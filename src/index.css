@@ -1041,7 +1041,7 @@ input:-webkit-autofill:active {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black overlay */
+  background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent black overlay */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1066,7 +1066,7 @@ input:-webkit-autofill:active {
   justify-content: center;
   align-items: center;
   transform: scale(0.3) rotate(-270deg); /* Más recorrido: scale 0.3, rotate -270deg */
-  transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Más lenta: 0.6s */
+  transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Más lenta: 0.6s */
 }
 
 .radial-menu.open {
@@ -1201,7 +1201,7 @@ input:-webkit-autofill:active {
   border-radius: 4px;
   white-space: nowrap;
   z-index: 10;
-  transition: opacity 0.3s ease, visibility 0s linear 0.3s, transform 0.3s ease;
+  transition: opacity 0.3s ease, visibility 0s linear 0s, transform 0s ease;
   box-shadow: 0 0 8px rgba(var(--df-primary-light-rgb), 0.5);
   border: 1px solid var(--df-primary-light);
   /* Default transform, will be overridden per item */
@@ -1220,6 +1220,37 @@ input:-webkit-autofill:active {
   display: none;
 }
 
+.radial-menu-action-label-delete {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute; /* Crucial: absolute to its parent button */
+  background-color: rgba(var(--df-bg-primary-rgb), 0.9);
+  color: var(--df-error-rgb);
+  font-family: var(--font-family-headings);
+  font-size: 0.75rem; /* Ligeramente más pequeño */
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 10;
+  transition: opacity 0.3s ease, visibility 0s linear 0s, transform 0s ease;
+  box-shadow: 0 0 8px rgba(var(--df-error-rgb), 0.5);
+  border: 1px solid var(--df-error-rgb);
+  /* Default transform, will be overridden per item */
+  transform: translate(-50%, -50%); /* Centrado por defecto, luego ajustado */
+  pointer-events: none; /* Para que no interfiera con el hover del botón */
+}
+
+.radial-menu-item:hover .radial-menu-action-label-delete {
+  visibility: visible;
+  opacity: 1;
+  transition-delay: 0s, 0s, 0s;
+}
+
+/* Ajustes para que el texto no interfiera con el menú cuando está cerrado o abriendo/cerrando */
+.radial-menu:not(.open) .radial-menu-action-label-delete {
+  display: none;
+}
+
 /* Posicionamiento de las etiquetas FUERA del hexágono, en la dirección del radio */
 /* Distancia desde el centro del hexágono a la etiqueta: aprox. 50px (hexágono) + 10px (espacio) = 60px */
 /* Los valores X e Y son relativos al centro del botón (hexágono) */
@@ -1233,22 +1264,22 @@ input:-webkit-autofill:active {
 .radial-menu-item.edit:hover .radial-menu-action-label {
   /* Botón en (95.26px, -55px). Etiqueta hacia afuera en esa dirección. */
   /* Centro del botón es (0,0). Queremos la etiqueta en la dirección ~30 deg */
-  transform: translate(100%, -180%); /* Sin cambios por ahora */
+  transform: translate(100%, -170%); /* Sin cambios por ahora */
 }
 
 .radial-menu-item.add-task:hover .radial-menu-action-label {
   /* Botón en (95.26px, 55px). Etiqueta hacia afuera en esa dirección. */
-  transform: translate(100%, 180%); /* Sin cambios por ahora */
+  transform: translate(110%, 150%); /* Sin cambios por ahora */
 }
 
 .radial-menu-item.add-collab:hover .radial-menu-action-label {
   /* Botón en (-95.26px, 55px). Etiqueta hacia afuera. */
-  transform: translate(-100%, 180%); /* Sin cambios según feedback */
+  transform: translate(-90%, 150%); /* Sin cambios según feedback */
 }
 
-.radial-menu-item.delete:hover .radial-menu-action-label {
+.radial-menu-item.delete:hover .radial-menu-action-label-delete {
   /* Botón en (-95.26px, -55px). Etiqueta hacia afuera. */
-  transform: translate(-100%, -180%); /* Sin cambios según feedback */
+  transform: translate(-100%, -170%); /* Sin cambios según feedback */
 }
 
 .radial-menu-item.cancel:hover .radial-menu-action-label {

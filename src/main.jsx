@@ -7,6 +7,7 @@ import { BrowserRouter } from 'react-router-dom'; // Importa BrowserRouter
 import 'bootstrap/dist/css/bootstrap.min.css'; 
 // Luego importa tus estilos personalizados para que puedan sobrescribir Bootstrap
 import './index.css'; 
+import './App.css'; // <--- Añadir esta línea
 
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'; // Importa Bootstrap JS Bundle
 import 'bootstrap-icons/font/bootstrap-icons.css'; // Opcional: para iconos de Bootstrap

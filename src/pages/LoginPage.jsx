@@ -70,27 +70,33 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="container login-page-container py-5">
-      <div className="row justify-content-center">
-        <div className="col-md-10 col-lg-8"> {/* Cambiado de col-md-8 col-lg-6 */}
-          <div className="card">
-            <div className="card-body p-4">
-              <h2 className="card-title text-center mb-4">Iniciar Sesión en DevFlow</h2>
+    <div className="container-fluid d-flex justify-content-center align-items-center vh-100 login-page-container" style={{ paddingTop: '0', paddingBottom: '5rem' }}> {/* Ajustado el padding para subir el contenedor */}
+      <div className="row justify-content-center w-100">
+        <div className="col-11 col-sm-8 col-md-6 col-lg-5 col-xl-4">
+          <div className="card hero-section-content">
+            <div className="card-body pt-2 px-4 pb-4 pt-md-3 px-md-5 pb-md-5"> {/* Ajustado padding superior */}
+              <div className="text-center mb-4">
+                <img src="/src/assets/logo.png" alt="DevFlow Logo" style={{ maxWidth: '350px', marginBottom: '1rem' }} />
+              </div>
+              <h2 className="card-title text-center mb-4">Iniciar Sesión</h2>
               {error && <div className="alert alert-danger">{error}</div>}
               
               <button 
                 onClick={handleLogin} 
-                className="btn btn-dark w-100 mb-3 d-flex align-items-center justify-content-center" 
+                className="btn btn-dark mx-auto mb-3 d-flex justify-content-center align-items-center" /* Estilos de Flexbox actualizados */
+                style={{ width: '150px' }} /* Ancho fijo mantenido */
                 disabled={loading}
               >
-                <i className="bi bi-github me-2"></i>
                 {loading ? (
                   <>
                     <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    Iniciando sesión...
+                    <span>Iniciando sesión...</span> {/* Texto envuelto en span */}
                   </>
                 ) : (
-                  'Iniciar Sesión con GitHub'
+                  <div className="d-flex align-items-baseline"> {/* Contenedor para alinear icono y texto */}
+                    <i className="bi bi-github me-2"></i>
+                    <span>Iniciar Sesión con GitHub</span> {/* Texto envuelto en span */}
+                  </div>
                 )}
               </button>
               
