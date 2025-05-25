@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react'; // useEffect añadido
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { getUserProjects, getUserDocument } from '../services/firestore'; // getUserDocument añadido
-import ProjectCard from '../components/ProjectCard'; // Importar ProjectCard
+import ProjectCard from '../components/ProjectCard';
+import CreateTaskModal from '../components/CreateTaskModal'; // Importar CreateTaskModal
+import ConfirmationModal from '../components/ConfirmationModal'; // Importar ConfirmationModal
 
 const DashboardPage = () => {
   const { currentUser, logout } = useAuth();
@@ -13,6 +15,22 @@ const DashboardPage = () => {
   const [errorProjects, setErrorProjects] = useState('');
   const [userProfileData, setUserProfileData] = useState(null); // Nuevo estado para perfil
   const [loadingProfile, setLoadingProfile] = useState(true); // Nuevo estado de carga para perfil
+
+  // Estados para el modal de creación de tareas
+  const [showCreateTaskModal, setShowCreateTaskModal] = useState(false);
+  const [selectedProjectIdForTask, setSelectedProjectIdForTask] = useState(null);
+
+  // Estados para el ConfirmationModal
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [confirmationModalConfig, setConfirmationModalConfig] = useState({
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    confirmText: 'Confirmar',
+    cancelText: 'Cancelar',
+    showCancelButton: true,
+    confirmButtonClass: 'btn-primary',
+  });
 
   useEffect(() => {
     if (currentUser?.uid) {
@@ -86,16 +104,17 @@ const DashboardPage = () => {
 
   const handleRadialAction = (action, projectId) => {
     console.log(`Dashboard action: ${action}, for project ID: ${projectId}`);
-    // Lógica para manejar cada acción
     switch (action) {
       case 'view_details':
         navigate(`/project/${projectId}`);
         break;
       case 'edit_project':
-        navigate(`/edit-project/${projectId}`);
+        console.log('DashboardPage navigating to edit, projectId:', projectId);
+        navigate(`/project/edit/${projectId}`);
         break;
       case 'add_task':
-        console.log('Abrir modal para añadir tarea al proyecto:', projectId);
+        setSelectedProjectIdForTask(projectId);
+        setShowCreateTaskModal(true);
         break;
       case 'add_collaborator':
         console.log('Abrir modal para añadir colaborador al proyecto:', projectId);
@@ -109,6 +128,24 @@ const DashboardPage = () => {
       default:
         console.warn(`Acción desconocida: ${action}`);
     }
+  };
+
+  const handleTaskCreated = () => {
+    setShowCreateTaskModal(false);
+    setSelectedProjectIdForTask(null);
+    // Mostrar modal de éxito
+    setConfirmationModalConfig({
+      title: "Éxito",
+      message: "Tarea creada con éxito.",
+      onConfirm: () => setShowConfirmationModal(false),
+      confirmText: 'OK',
+      showCancelButton: false,
+      confirmButtonClass: 'btn-success',
+    });
+    setShowConfirmationModal(true);
+    // Opcionalmente, se podría recargar la lista de proyectos o tareas si fuera necesario
+    // pero dado que la tarea se crea y el usuario navega a detalles para verla,
+    // no es estrictamente necesario aquí refrescar datos del dashboard.
   };
 
   return (
@@ -164,6 +201,39 @@ const DashboardPage = () => {
           </div>
         </div>
       )}
+
+      {/* Modal para crear tarea */}
+      <CreateTaskModal 
+        isOpen={showCreateTaskModal}
+        onClose={() => {
+          setShowCreateTaskModal(false);
+          setSelectedProjectIdForTask(null);
+        }}
+        projectId={selectedProjectIdForTask}
+        onTaskCreated={handleTaskCreated}
+      />
+
+      {/* Modal de Confirmación/Éxito/Error */}
+      <ConfirmationModal
+        isOpen={showConfirmationModal}
+        onClose={() => {
+            // Si hay una acción específica al cerrar (ej. onConfirm), se ejecuta.
+            // Si no, simplemente cerramos.
+            if (confirmationModalConfig.onClose) {
+                confirmationModalConfig.onClose();
+            } else {
+                confirmationModalConfig.onConfirm(); // Ejecuta la acción de confirmación por defecto si no hay onClose
+            }
+            setShowConfirmationModal(false); 
+        }}
+        title={confirmationModalConfig.title}
+        message={confirmationModalConfig.message}
+        onConfirm={confirmationModalConfig.onConfirm}
+        confirmText={confirmationModalConfig.confirmText}
+        cancelText={confirmationModalConfig.cancelText}
+        showCancelButton={confirmationModalConfig.showCancelButton}
+        confirmButtonClass={confirmationModalConfig.confirmButtonClass}
+      />
     </div>
   );
 };

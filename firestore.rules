@@ -4,13 +4,20 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     match /projects/{projectId} {
-      allow read: if request.auth != null || (resource.data.isPublic == true);
+      allow read: if true; // Permitir lectura de proyectos a cualquier usuario autenticado o no
       allow create: if request.auth != null;
       allow update: if request.auth != null && request.auth.uid == resource.data.ownerId;
       allow delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
     }
 
     match /tasks/{taskId} {
+      allow create: if request.auth != null && (
+        get(/databases/$(database)/documents/projects/$(request.resource.data.projectId)).data.ownerId == request.auth.uid
+        || (
+          get(/databases/$(database)/documents/projects/$(request.resource.data.projectId)).data.collaborators is list
+          && request.auth.uid in get(/databases/$(database)/documents/projects/$(request.resource.data.projectId)).data.collaborators
+        )
+      );
       allow read: if (
         // Proyecto público
         get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.isPublic == true
@@ -28,14 +35,6 @@ service cloud.firestore {
             // Asignado a la tarea
             || (resource.data.assignedTo != null && resource.data.assignedTo == request.auth.uid)
           )
-        )
-      );
-
-      allow create: if request.auth != null && (
-        get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.ownerId == request.auth.uid
-        || (
-          get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.collaborators is list
-          && request.auth.uid in get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.collaborators
         )
       );
 

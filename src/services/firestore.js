@@ -31,6 +31,7 @@ export const createNewProject = async (projectData) => {
   try {
     const docRef = await addDoc(collection(db, PROJECTS_COLLECTION), {
       ...projectData,
+      collaborators: projectData.collaborators || [], // Siempre crea el campo como array (vacío si no se pasa)
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
@@ -170,15 +171,17 @@ export const createTaskForProject = async (projectId, taskData, userId) => {
     throw new Error("Se requiere ID de usuario para crear una tarea.");
   }
   try {
-    const docRef = await addDoc(collection(db, TASKS_COLLECTION), {
+    const payload = {
       projectId: projectId,
-      ...taskData, // title, description (opcional), priority (opcional), dueDate (opcional)
-      creatorId: userId,
-      assignedTo: taskData.assignedTo || null, // Si no se asigna, queda null
-      status: taskData.status || 'pendiente', // Estado inicial por defecto
+      ...taskData, // title, description, assignedTo
+      assignedTo: taskData.assignedTo || null,
+      status: taskData.status || 'pendiente',
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
-    });
+      creatorId: userId, // <-- ¡AL FINAL para evitar sobrescritura!
+    };
+    console.log('[createTaskForProject] Payload enviado a Firestore:', payload);
+    const docRef = await addDoc(collection(db, TASKS_COLLECTION), payload);
     return docRef.id;
   } catch (error) {
     console.error("Error al crear tarea: ", error);

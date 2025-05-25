@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const EditProjectPage = () => {
   const { projectId } = useParams();
+  console.log('EditProjectPage projectId:', projectId); // DEBUG
   const navigate = useNavigate();
   const { currentUser } = useAuth();
 
@@ -14,19 +15,35 @@ const EditProjectPage = () => {
   const [githubLink, setGithubLink] = useState('');
   const [isPublic, setIsPublic] = useState(true);
   const [originalProject, setOriginalProject] = useState(null);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [pageLoading, setPageLoading] = useState(true); // Para la carga inicial de datos
+  
+  const [pageLoading, setPageLoading] = useState(true);
+  const [pageError, setPageError] = useState(''); // Error al cargar la página/datos
+
+  const [submitLoading, setSubmitLoading] = useState(false); // Para el envío del formulario
+  const [formError, setFormError] = useState(''); // Error al enviar el formulario
 
   useEffect(() => {
     const fetchProject = async () => {
       setPageLoading(true);
-      setError('');
+      setPageError('');
+      setOriginalProject(null); 
+
+      if (!projectId) {
+        setPageError("ID de proyecto no válido o no proporcionado.");
+        setPageLoading(false);
+        return;
+      }
+
       try {
         const projectData = await getProjectById(projectId);
-        if (!currentUser || projectData.ownerId !== currentUser.uid) {
-          setError("No tienes permiso para editar este proyecto.");
-          setOriginalProject(null); // Limpiar por si acaso
+
+        if (!projectData) {
+          setPageError("Proyecto no encontrado.");
+        } else if (!currentUser) {
+          // Este caso debería ser manejado por rutas protegidas, pero es una salvaguarda.
+          setPageError("Debes iniciar sesión para editar proyectos.");
+        } else if (projectData.ownerId !== currentUser.uid) {
+          setPageError("No tienes permiso para editar este proyecto.");
         } else {
           setOriginalProject(projectData);
           setTitle(projectData.title);
@@ -36,57 +53,57 @@ const EditProjectPage = () => {
         }
       } catch (err) {
         console.error("Error fetching project for edit:", err);
-        setError(err.message || "Error al cargar el proyecto para editar.");
+        setPageError(err.message || "Ocurrió un error al cargar los datos del proyecto. Por favor, inténtalo de nuevo.");
       }
       setPageLoading(false);
     };
 
-    if (projectId) {
-      fetchProject();
-    }
+    fetchProject();
   }, [projectId, currentUser]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setFormError('');
 
-    if (!originalProject || !currentUser || originalProject.ownerId !== currentUser.uid) {
-      setError("No tienes permiso para realizar esta acción o el proyecto original no se cargó.");
+    if (!originalProject) {
+      setFormError("No se pueden guardar los cambios, los datos originales del proyecto no están cargados.");
+      return;
+    }
+    if (!currentUser || originalProject.ownerId !== currentUser.uid) {
+      setFormError("No tienes permiso para realizar esta acción.");
       return;
     }
 
     if (!title.trim() || !description.trim() || !githubLink.trim()) {
-      setError("Todos los campos (Título, Descripción, Enlace de GitHub) son obligatorios.");
+      setFormError("Todos los campos (Título, Descripción, Enlace de GitHub) son obligatorios.");
       return;
     }
     try {
       const url = new URL(githubLink);
       if (url.hostname !== 'github.com') {
-        setError("El enlace debe ser una URL válida de github.com.");
+        setFormError("El enlace debe ser una URL válida de github.com.");
         return;
       }
     } catch (_) {
-      setError("El enlace al repositorio de GitHub no es una URL válida.");
+      setFormError("El enlace al repositorio de GitHub no es una URL válida.");
       return;
     }
 
-    setLoading(true);
+    setSubmitLoading(true);
     try {
       const updatedData = {
         title,
         description,
         githubLink,
         isPublic,
-        // ownerId no cambia, createdAt no cambia
-        // updatedAt se actualiza automáticamente en la función updateProject
       };
       await updateProject(projectId, updatedData);
-      navigate(`/project/${projectId}`); // Redirigir a la página de detalles del proyecto
+      navigate(`/project/${projectId}`); 
     } catch (err) {
-      setError(err.message || "Error al actualizar el proyecto.");
+      setFormError(err.message || "Error al actualizar el proyecto.");
       console.error("Error updating project:", err);
     }
-    setLoading(false);
+    setSubmitLoading(false);
   };
 
   if (pageLoading) {
@@ -99,75 +116,90 @@ const EditProjectPage = () => {
     );
   }
 
-  if (error && !originalProject) { // Si hay un error crítico (ej. no permisos, no encontrado)
+  if (pageError) {
     return (
       <div className="container mt-5">
-        <div className="alert alert-danger">
-          <h4>Error</h4>
-          <p>{error}</p>
-          <Link to={originalProject ? `/project/${projectId}` : "/projects"} className="btn btn-primary">
-            {originalProject ? "Volver al Proyecto" : "Volver a Proyectos"}
-          </Link>
+        <div className="row justify-content-center">
+          <div className="col-md-8 col-lg-6">
+            <div className="alert alert-danger text-center">
+              <h4 className="alert-heading">Error al Cargar</h4>
+              <p>{pageError}</p>
+              <Link to={originalProject ? `/project/${projectId}` : "/dashboard"} className="btn btn-primary mt-2">
+                 {originalProject ? "Intentar Volver al Proyecto" : "Volver al Dashboard"}
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
   
-  // Si originalProject es null después de cargar y no hay error crítico, 
-  // podría ser un caso no manejado, pero la lógica de error debería cubrirlo.
-  if (!originalProject && !pageLoading) {
+  if (!originalProject) {
+      // Este caso debería ser cubierto por pageError, pero como última salvaguarda.
       return (
           <div className="container mt-5">
-              <div className="alert alert-warning">No se pudo cargar el proyecto para editar o no tienes permisos.</div>
-              <Link to="/projects" className="btn btn-info">Volver a Proyectos</Link>
+            <div className="row justify-content-center">
+              <div className="col-md-8 col-lg-6">
+                <div className="alert alert-warning text-center">
+                  <h4 className="alert-heading">Proyecto no Disponible</h4>
+                  <p>No se pudieron cargar los datos del proyecto para editar. Es posible que el proyecto haya sido eliminado o que haya un problema temporal.</p>
+                  <Link to="/dashboard" className="btn btn-info mt-2">Volver al Dashboard</Link>
+                </div>
+              </div>
+            </div>
           </div>
       );
   }
 
-
   return (
     <div className="container mt-5">
-      {loading && <p>Cargando...</p>}
-      {error && <p className="text-danger">{error}</p>}
-      {originalProject && (
-        <>
-          <h2 className="mb-4 dashboard-title-tech">Editar Proyecto: {originalProject?.title}</h2>
-          <form onSubmit={handleSubmit}>
-            {/* Mostrar error de validación/actualización aquí */}
-            {error && originalProject && <div className="alert alert-danger">{error}</div>}
-            
-            <div className="mb-3">
-              <label htmlFor="title" className="form-label">Título del Proyecto <span className="text-danger">*</span></label>
-              <input type="text" className="form-control" id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+      <div className="row justify-content-center">
+        <div className="col-md-8 col-lg-7">
+          <h2 className="mb-4 dashboard-title-tech text-center">
+            Editar: <span style={{wordBreak: 'break-word'}}>{originalProject.title}</span>
+          </h2>
+          <div className="card">
+            <div className="card-body">
+              <form onSubmit={handleSubmit}>
+                {formError && <div className="alert alert-danger">{formError}</div>}
+                
+                <div className="mb-3">
+                  <label htmlFor="title" className="form-label">Título del Proyecto <span className="text-danger">*</span></label>
+                  <input type="text" className="form-control" id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="description" className="form-label">Descripción <span className="text-danger">*</span></label>
+                  <textarea className="form-control" id="description" rows="4" value={description} onChange={(e) => setDescription(e.target.value)} ></textarea>
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="githubLink" className="form-label">Enlace al Repositorio de GitHub <span className="text-danger">*</span></label>
+                  <input type="url" className="form-control" id="githubLink" value={githubLink} onChange={(e) => setGithubLink(e.target.value)} placeholder="https://github.com/usuario/repo"/>
+                </div>
+                <div className="mb-3 form-check">
+                  <input type="checkbox" className="form-check-input" id="isPublic" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
+                  <label className="form-check-label" htmlFor="isPublic">Hacer este proyecto público</label>
+                </div>
+                <div className="d-flex justify-content-end mt-4">
+                  <Link to={`/project/${projectId}`} className="btn btn-outline-secondary me-3">
+                    Cancelar
+                  </Link>
+                  <button type="submit" className="btn btn-primary" disabled={submitLoading}>
+                    {submitLoading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span className="ms-2">Guardando Cambios...</span>
+                      </>
+                    ) : 'Guardar Cambios'}
+                  </button>
+                </div>
+              </form>
             </div>
-            <div className="mb-3">
-              <label htmlFor="description" className="form-label">Descripción <span className="text-danger">*</span></label>
-              <textarea className="form-control" id="description" rows="4" value={description} onChange={(e) => setDescription(e.target.value)} ></textarea>
-            </div>
-            <div className="mb-3">
-              <label htmlFor="githubLink" className="form-label">Enlace al Repositorio de GitHub <span className="text-danger">*</span></label>
-              <input type="url" className="form-control" id="githubLink" value={githubLink} onChange={(e) => setGithubLink(e.target.value)} placeholder="https://github.com/usuario/repo"/>
-            </div>
-            <div className="mb-3 form-check">
-              <input type="checkbox" className="form-check-input" id="isPublic" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
-              <label className="form-check-label" htmlFor="isPublic">Hacer este proyecto público</label>
-            </div>
-            <div className="d-flex justify-content-end">
-              <Link to={`/project/${projectId}`} className="btn btn-outline-secondary me-2">
-                Cancelar
-              </Link>
-              <button type="submit" className="btn btn-primary" disabled={loading || !originalProject}>
-                {loading ? (
-                  <>
-                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <span className="ms-2">Guardando Cambios...</span>
-                  </>
-                ) : 'Guardar Cambios'}
-              </button>
-            </div>
-          </form>
-        </>
-      )}
+          </div>
+          <Link to={`/project/${projectId}`} className="btn btn-link mt-4 mb-5 d-block text-start">
+            <i className="bi bi-arrow-left-circle me-2"></i>Volver a Detalles del Proyecto
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };

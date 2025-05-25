@@ -27,7 +27,13 @@ export const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
-      // Aquí podrías añadir lógica para guardar/actualizar el usuario en Firestore si es necesario
+      if (user) {
+        user.getIdToken().then(token => {
+          console.log('[AuthContext] UID:', user.uid, '| Token:', token);
+        });
+      } else {
+        console.log('[AuthContext] No user logged in');
+      }
     });
 
     return unsubscribe; // Cleanup subscription on unmount
