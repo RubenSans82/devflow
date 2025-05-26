@@ -93,6 +93,28 @@ body {
   min-height: 100vh; /* Asegurar que el contenedor de React ocupe toda la altura de la vista */
 }
 
+/* --- Iluminación del grid con el puntero del ratón (versión sutil) --- */
+html::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(var(--df-accent-primary-rgb), 0.13) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, rgba(var(--df-accent-primary-rgb), 0.13) 1.5px, transparent 1.5px),
+    radial-gradient(circle at var(--mouse-x, 50vw) var(--mouse-y, 50vh), rgba(var(--df-accent-primary-rgb), 0.10) 0 50px, transparent 120px);
+  background-size: 40px 40px, 40px 40px, 100vw 100vh;
+  background-repeat: repeat, repeat, no-repeat;
+  background-blend-mode: lighten;
+  opacity: 1;
+  transition: background 0.2s;
+}
+
+body { position: relative; z-index: 1; }
+
+/* Script para actualizar las variables CSS con la posición del ratón */
+
 /* Estilos para encabezados */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-family-headings);
