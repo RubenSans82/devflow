@@ -10,20 +10,30 @@ const NotificationCenter = () => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef();
 
+  const fetchNotifications = async () => {
+    setLoading(true);
+    try {
+      const notifs = await getNotificationsForUser(currentUser.uid);
+      setNotifications(notifs);
+    } catch (err) {
+      setNotifications([]);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (!currentUser) return;
-    const fetchNotifications = async () => {
-      setLoading(true);
-      try {
-        const notifs = await getNotificationsForUser(currentUser.uid);
-        setNotifications(notifs);
-      } catch (err) {
-        setNotifications([]);
-      }
-      setLoading(false);
-    };
     fetchNotifications();
+    // eslint-disable-next-line
   }, [currentUser]);
+
+  // Refrescar notificaciones cada vez que se abre el dropdown
+  useEffect(() => {
+    if (open && currentUser) {
+      fetchNotifications();
+    }
+    // eslint-disable-next-line
+  }, [open]);
 
   // Cerrar el dropdown al hacer click fuera
   useEffect(() => {
@@ -36,22 +46,79 @@ const NotificationCenter = () => {
   }, [open]);
 
   const handleMarkAsRead = async (notifId) => {
-    await markNotificationAsRead(notifId);
-    setNotifications(n => n.map(notif => notif.id === notifId ? { ...notif, read: true } : notif));
+    try {
+      await markNotificationAsRead(notifId); // Actualiza en Firestore
+      setNotifications(prevNotifications =>
+        prevNotifications.map(n =>
+          n.id === notifId ? { ...n, read: true } : n
+        )
+      );
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      // Aquí podrías añadir una notificación de error al usuario si es necesario
+    }
   };
 
   const handleAccept = async (notif) => {
-    await acceptCollaborationRequest(notif);
-    setNotifications(n => n.map(nf => nf.id === notif.id ? { ...nf, status: 'accepted' } : nf));
+    try {
+      await acceptCollaborationRequest(notif); // Actualiza status en Firestore
+      await markNotificationAsRead(notif.id);   // Actualiza read en Firestore
+      setNotifications(prevNotifications =>
+        prevNotifications.map(n =>
+          n.id === notif.id ? { ...n, status: 'accepted', read: true } : n
+        )
+      );
+    } catch (error) {
+      console.error("Error accepting collaboration:", error);
+    }
   };
 
   const handleReject = async (notif) => {
-    await rejectCollaborationRequest(notif);
-    setNotifications(n => n.map(nf => nf.id === notif.id ? { ...nf, status: 'rejected' } : nf));
+    try {
+      await rejectCollaborationRequest(notif); // Actualiza status en Firestore
+      await markNotificationAsRead(notif.id);    // Actualiza read en Firestore
+      setNotifications(prevNotifications =>
+        prevNotifications.map(n =>
+          n.id === notif.id ? { ...n, status: 'rejected', read: true } : n
+        )
+      );
+    } catch (error) {
+      console.error("Error rejecting collaboration:", error);
+    }
+  };
+
+  // Determina si la notificación es relevante para el usuario actual (destinatario o emisor)
+  const isNotifVisibleForCurrentUser = (notif) => {
+    // El destinatario (ownerId o userId) o el emisor (requesterId) pueden ver la notificación
+    if (notif.type === 'collaboration_request') {
+      return notif.ownerId === currentUser.uid || notif.requesterId === currentUser.uid;
+    }
+    if (notif.userId) {
+      return notif.userId === currentUser.uid;
+    }
+    return false;
+  };
+
+  const isCurrentUserRecipient = (notif) => {
+    // Solo el destinatario puede aceptar/rechazar
+    if (notif.type === 'collaboration_request') {
+      return notif.ownerId === currentUser.uid;
+    }
+    if (notif.userId) {
+      return notif.userId === currentUser.uid;
+    }
+    return false;
+  };
+
+  // Determina si el usuario actual es el emisor de la notificación
+  const isCurrentUserSender = (notif) => {
+    return notif.requesterId && notif.requesterId === currentUser.uid;
   };
 
   if (!currentUser) return null;
-  const unreadCount = notifications.filter(n => !n.read).length;
+
+  // Cálculo refinado de unreadCount: solo cuenta notificaciones no leídas donde el usuario actual es el destinatario.
+  const unreadCount = notifications.filter(n => !n.read && isCurrentUserRecipient(n)).length;
 
   return (
     <div className="dropdown" ref={dropdownRef} style={{ position: 'relative' }}>
@@ -74,25 +141,42 @@ const NotificationCenter = () => {
               <li className="list-group-item text-center">Cargando...</li>
             ) : notifications.length === 0 ? (
               <li className="list-group-item text-center text-muted">No tienes notificaciones.</li>
-            ) : notifications.map(notif => (
-              <li key={notif.id} className={`list-group-item d-flex justify-content-between align-items-center${notif.read ? ' text-muted' : ''}`}> 
+            ) : notifications.filter(isNotifVisibleForCurrentUser).length === 0 ? (
+              <li className="list-group-item text-center text-muted">No tienes notificaciones para ti.</li>
+            ) : notifications.filter(isNotifVisibleForCurrentUser).map(notif => (
+              <li key={notif.id} className={`list-group-item${notif.read ? ' text-muted' : ''}`}> 
                 <div style={{ fontSize: '0.97em' }}>
                   {notif.type === 'collaboration_request' && (
                     <>
                       <span><b>{notif.requesterName}</b> quiere colaborar en <b>{notif.projectTitle}</b></span>
-                      {notif.status === 'pending' && (
-                        <>
-                          <button className="btn btn-success btn-sm ms-2" onClick={() => handleAccept(notif)}>Aceptar</button>
-                          <button className="btn btn-danger btn-sm ms-2" onClick={() => handleReject(notif)}>Rechazar</button>
-                        </>
+                      {/* Botones solo para el destinatario y si está pendiente */}
+                      {notif.status === 'pending' && isCurrentUserRecipient(notif) ? (
+                        <div className="d-flex gap-2 mt-2 justify-content-start">
+                          <button className="btn btn-outline-primary btn-sm px-2 py-1" style={{ minWidth: 70 }} onClick={() => handleAccept(notif)}>
+                            Aceptar
+                          </button>
+                          <button className="btn btn-outline-danger btn-sm px-2 py-1" style={{ minWidth: 70 }} onClick={() => handleReject(notif)}>
+                            Rechazar
+                          </button>
+                        </div>
+                      ) : null}
+                      {/* Estado visible para emisor y destinatario cuando no está pendiente */}
+                      {notif.status !== 'pending' && (isCurrentUserRecipient(notif) || isCurrentUserSender(notif)) && (
+                        <div className={`mt-2 small ${notif.status === 'accepted' ? 'text-success' : notif.status === 'rejected' ? 'text-danger' : 'text-secondary'}`}>{
+                          notif.status === 'accepted' ? 'Aceptado' : notif.status === 'rejected' ? 'Rechazado' : 'Pendiente'
+                        }</div>
                       )}
-                      {notif.status === 'accepted' && <span className="ms-2 text-success">Aceptado</span>}
-                      {notif.status === 'rejected' && <span className="ms-2 text-danger">Rechazado</span>}
+                      {/* El emisor ve "Pendiente" si sigue pendiente */}
+                      {notif.status === 'pending' && isCurrentUserSender(notif) && !isCurrentUserRecipient(notif) && (
+                        <div className="mt-2 text-secondary small">Pendiente</div>
+                      )}
                     </>
                   )}
+                  {/* Otros tipos de notificación aquí si se desea */}
                 </div>
-                {!notif.read && (
-                  <button className="btn btn-link btn-sm" onClick={() => handleMarkAsRead(notif.id)} title="Marcar como leída">
+                {/* Botón de marcar como leída solo para el destinatario y si está pendiente */}
+                {!notif.read && notif.status === 'pending' && isCurrentUserRecipient(notif) && (
+                  <button className="btn btn-link btn-sm p-0 ms-2 float-end" onClick={() => handleMarkAsRead(notif.id)} title="Marcar como leída">
                     <i className="bi bi-check2"></i>
                   </button>
                 )}

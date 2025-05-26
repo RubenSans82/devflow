@@ -1,6 +1,6 @@
 // src/components/CreateTaskModal.jsx
 import React, { useState, useEffect } from 'react';
-import { createTaskForProject, getAllUsers } from '../services/firestore';
+import { createTaskForProject, getAllUsers, getProjectById, addNotification } from '../services/firestore';
 import { useAuth } from '../contexts/AuthContext';
 
 const CreateTaskModal = ({ isOpen, onClose, projectId, onTaskCreated }) => {
@@ -53,19 +53,28 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, onTaskCreated }) => {
     setLoading(true);
     setError('');
     try {
+      // Obtener datos del proyecto para saber el owner
+      const project = await getProjectById(projectId);
       const taskData = {
         title,
         description,
         assignedTo: assignedTo || null, // Guardar null si no se selecciona nadie
       };
-      console.log("CreateTaskModal: handleSubmit - projectId:", projectId);
-      console.log("CreateTaskModal: handleSubmit - currentUser.uid:", currentUser.uid);
-      console.log("CreateTaskModal: handleSubmit - taskData:", taskData);
       await createTaskForProject(
         projectId,
         taskData,
         currentUser.uid // createdBy
       );
+      // Notificar al owner si el creador no es el owner
+      if (project && project.ownerId && currentUser.uid !== project.ownerId) {
+        await addNotification({
+          userId: project.ownerId,
+          type: 'task_created',
+          title: 'Nueva tarea en tu proyecto',
+          message: `${currentUser.displayName || currentUser.email || 'Un usuario'} ha creado una tarea en tu proyecto "${project.title}"`,
+          extra: { projectId, projectTitle: project.title }
+        });
+      }
       setLoading(false);
       onTaskCreated(); // Llama a la función callback (cierra modal, muestra éxito)
     } catch (err) {

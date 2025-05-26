@@ -150,11 +150,3 @@ const ProjectCard = ({ project, showDetailsButton = true, displayContext = 'home
 };
 
 export default ProjectCard;
-
-// Auto-ocultar el toast después de 3 segundos
-React.useEffect(() => {
-  if (toast.show) {
-    const timer = setTimeout(() => setToast(t => ({ ...t, show: false })), 3000);
-    return () => clearTimeout(timer);
-  }
-}, [toast.show]);

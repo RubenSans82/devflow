@@ -63,7 +63,14 @@ service cloud.firestore {
     match /notifications/{notificationId} {
       allow create: if request.auth != null && request.resource.data.requesterId == request.auth.uid;
       allow read: if request.auth != null && (resource.data.ownerId == request.auth.uid || resource.data.requesterId == request.auth.uid);
-      allow update: if false;
+      allow update: if request.auth != null && (
+        // El destinatario puede cambiar status y read
+        (resource.data.ownerId == request.auth.uid && (
+          (request.resource.data.status in ['accepted', 'rejected'] || request.resource.data.read == true)
+        )) ||
+        // El emisor puede marcar como leída su propia notificación
+        (resource.data.requesterId == request.auth.uid && request.resource.data.read == true)
+      );
       allow delete: if false;
     }
   }

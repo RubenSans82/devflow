@@ -10,7 +10,8 @@ import {
   deleteTask,  
   getAllUsers, // Importar getAllUsers
   addCollaboratorToProject, // Importar función para añadir colaborador
-  removeCollaboratorFromProject // Importar función para remover colaborador
+  removeCollaboratorFromProject, // Importar función para remover colaborador
+  addNotification // Importar función para añadir notificaciones
 } from '../services/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import TaskItem from '../components/TaskItem';
@@ -132,17 +133,17 @@ const ProjectDetailPage = () => {
     e.preventDefault();
     if (!newTaskTitle.trim()) {
       setTaskError("El título de la tarea es obligatorio.");
-      // Mostrar error en el formulario, no en modal, o un modal específico para errores de formulario
       return;
     }
     if (!currentUser) {
       setTaskError("Debes estar autenticado para crear tareas.");
-      // Mostrar error en el formulario
       return;
     }
 
     setTaskError('');
     try {
+      // Obtener datos del proyecto para saber el owner
+      const projectData = project || await getProjectById(projectId);
       await createTaskForProject(
         projectId, 
         { 
@@ -152,13 +153,21 @@ const ProjectDetailPage = () => {
         }, 
         currentUser.uid
       );
+      // Notificar al owner si el creador no es el owner
+      if (projectData && projectData.ownerId && currentUser.uid !== projectData.ownerId) {
+        await addNotification({
+          userId: projectData.ownerId,
+          type: 'task_created',
+          title: 'Nueva tarea en tu proyecto',
+          message: `${currentUser.displayName || currentUser.email || 'Un usuario'} ha creado una tarea en tu proyecto "${projectData.title}"`,
+          extra: { projectId, projectTitle: projectData.title }
+        });
+      }
       setNewTaskTitle('');
       setNewTaskDescription('');
       setNewTaskAssignedTo('');
       setShowCreateTaskForm(false);
       fetchProjectAndTasks(); 
-      
-      // Mostrar modal de éxito
       setConfirmationModalConfig({
         title: "Éxito",
         message: "Tarea creada con éxito.",
@@ -168,7 +177,6 @@ const ProjectDetailPage = () => {
         confirmButtonClass: 'btn-success',
       });
       setShowConfirmationModal(true);
-
     } catch (err) {
       console.error("Error al crear tarea en ProjectDetailPage:", err);
       let errorMessage = "Error al crear la tarea.";
@@ -179,22 +187,8 @@ const ProjectDetailPage = () => {
           errorMessage = `Error: ${err.message}`;
         }
       }
-      setTaskError(errorMessage); // Mostrar el error usando el estado taskError
-      
-      // Opcional: si aún quieres un modal para el error, puedes descomentar esto
-      /*
-      setConfirmationModalConfig({
-        title: "Error al Crear Tarea",
-        message: errorMessage,
-        onConfirm: () => setShowConfirmationModal(false),
-        confirmText: 'Cerrar',
-        showCancelButton: false,
-        confirmButtonClass: 'btn-danger',
-      });
-      setShowConfirmationModal(true);
-      */
+      setTaskError(errorMessage);
     }
-    // setLoadingCreateTask(false); // Si tuvieras un estado de carga específico
   };
 
   const handleTaskStatusChange = async (taskId, newStatus) => {

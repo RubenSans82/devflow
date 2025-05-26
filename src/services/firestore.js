@@ -359,3 +359,29 @@ export const rejectCollaborationRequest = async (notif) => {
   const notifRef = doc(db, 'notifications', notif.id);
   await updateDoc(notifRef, { status: 'rejected', read: true });
 };
+
+// --- Notificaciones genéricas ---
+/**
+ * Crea una notificación genérica para un usuario
+ * @param {Object} notificationData - { userId, type, title, message, extra }
+ * @returns {Promise<string>} id de la notificación creada
+ */
+export const addNotification = async ({ userId, type, title, message, extra = {} }) => {
+  if (!userId || !type || !title) throw new Error('Faltan datos obligatorios para la notificación');
+  try {
+    const notification = {
+      userId, // destinatario
+      type,   // ejemplo: 'task_created'
+      title,  // ejemplo: 'Nueva tarea en tu proyecto'
+      message, // ejemplo: 'Juan ha creado una tarea en tu proyecto X'
+      ...extra, // datos adicionales opcionales
+      createdAt: Timestamp.now(),
+      read: false
+    };
+    const docRef = await addDoc(collection(db, 'notifications'), notification);
+    return docRef.id;
+  } catch (error) {
+    console.error('Error al crear notificación:', error);
+    throw error;
+  }
+};
