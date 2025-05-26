@@ -55,6 +55,9 @@ const ProjectDetailPage = () => {
     confirmButtonClass: 'btn-primary',
   });
 
+  // Flag para evitar ejecución accidental si el usuario cancela
+  const deleteRef = React.useRef(false);
+
   const fetchProjectAndTasks = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -86,45 +89,48 @@ const ProjectDetailPage = () => {
     fetchProjectAndTasks();
   }, [fetchProjectAndTasks]);
 
-  const handleDelete = async () => {
+  // Handler real de borrado de proyecto (usado por ambos: botón y menú radial)
+  const handleDeleteProjectConfirmed = async () => {
+    try {
+      await deleteProject(projectId);
+      setShowConfirmationModal(false);
+      setConfirmationModalConfig({
+        title: "Éxito",
+        message: "Proyecto eliminado con éxito.",
+        onConfirm: () => {
+          setShowConfirmationModal(false);
+          navigate('/dashboard');
+        },
+        confirmText: 'OK',
+        showCancelButton: false,
+        confirmButtonClass: 'btn-success',
+      });
+      setShowConfirmationModal(true);
+    } catch (err) {
+      setShowConfirmationModal(false);
+      setConfirmationModalConfig({
+        title: "Error",
+        message: `Error al eliminar el proyecto: ${err.message || "Error desconocido"}`,
+        onConfirm: () => setShowConfirmationModal(false),
+        confirmText: 'Cerrar',
+        showCancelButton: false,
+        confirmButtonClass: 'btn-danger',
+      });
+      setShowConfirmationModal(true);
+    }
+  };
+
+  const handleDelete = () => {
     setConfirmationModalConfig({
       title: "Confirmar Eliminación",
       message: "¿Estás seguro de que quieres eliminar este proyecto? Esta acción no se puede deshacer y eliminará todas las tareas asociadas.",
-      onConfirm: async () => {
-        try {
-          await deleteProject(projectId);
-          setShowConfirmationModal(false); // Cerrar modal de confirmación
-          setConfirmationModalConfig({
-            title: "Éxito",
-            message: "Proyecto eliminado con éxito.",
-            onConfirm: () => {
-              setShowConfirmationModal(false);
-              navigate('/dashboard');
-            },
-            confirmText: 'OK',
-            showCancelButton: false,
-            confirmButtonClass: 'btn-success',
-          });
-          setShowConfirmationModal(true); // Mostrar modal de éxito
-        } catch (err) {
-          console.error("Error al eliminar proyecto:", err);
-          setShowConfirmationModal(false); // Cerrar modal de confirmación
-          setConfirmationModalConfig({
-            title: "Error",
-            message: `Error al eliminar el proyecto: ${err.message || "Error desconocido"}`,
-            onConfirm: () => setShowConfirmationModal(false),
-            confirmText: 'Cerrar',
-            showCancelButton: false,
-            confirmButtonClass: 'btn-danger',
-          });
-          setShowConfirmationModal(true); // Mostrar modal de error
-        }
-      },
+      onConfirm: handleDeleteProjectConfirmed,
       confirmText: 'Eliminar Proyecto',
       cancelText: 'Cancelar',
       showCancelButton: true,
       confirmButtonClass: 'btn-danger',
-      onClose: () => setShowConfirmationModal(false)
+      onClose: () => setShowConfirmationModal(false),
+      isDeleteConfirmation: true
     });
     setShowConfirmationModal(true);
   };
@@ -399,6 +405,17 @@ const ProjectDetailPage = () => {
     setShowConfirmationModal(true);
   };
 
+  // Evitar mostrar modal de éxito si el usuario cancela
+  const handleCloseConfirmationModal = () => {
+    // Si es un modal de confirmación de borrado, simplemente cerrar y NO ejecutar nada ni mostrar éxito
+    if (confirmationModalConfig.isDeleteConfirmation) {
+      setShowConfirmationModal(false);
+      setConfirmationModalConfig((prev) => ({ ...prev, isDeleteConfirmation: false }));
+      return;
+    }
+    setShowConfirmationModal(false);
+  };
+
   if (loading) return <div className="container mt-5"><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando...</span></div></div>;
   if (error) return <div className="container mt-5"><div className="alert alert-danger">Error: {error}</div></div>;
   if (!project) return <div className="container mt-5"><div className="alert alert-warning">Proyecto no encontrado.</div></div>;
@@ -606,12 +623,7 @@ const ProjectDetailPage = () => {
 
       <ConfirmationModal
         isOpen={showConfirmationModal}
-        onClose={() => {
-          setShowConfirmationModal(false);
-          // Si el modal era para una acción que redirige (ej. eliminar proyecto y luego OK),
-          // y el usuario cierra con X, la redirección no ocurrirá.
-          // Esto es generalmente aceptable, pero se podría manejar si es necesario.
-        }}
+        onClose={handleCloseConfirmationModal}
         onConfirm={confirmationModalConfig.onConfirm}
         title={confirmationModalConfig.title}
         message={confirmationModalConfig.message}

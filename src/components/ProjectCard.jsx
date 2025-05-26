@@ -102,27 +102,27 @@ const ProjectCard = ({ project, showDetailsButton = true, displayContext = 'home
         </div>
         <div className={`radial-menu-overlay ${isRadialMenuOpen ? 'open' : ''}`} onClick={toggleRadialMenu}> 
           <div className={`radial-menu ${isRadialMenuOpen ? 'open' : ''}`} onClick={(e) => e.stopPropagation()}> 
-            <button className="radial-menu-item view" onClick={() => handleActionClick('view_details')} title="Ver Detalles">
+            <button className="radial-menu-item view" onClick={() => handleActionClick('view_details')} tabIndex={0} aria-label="Ver Detalles">
               <i className="bi bi-eye-fill"></i>
               <div className="radial-menu-action-label">Ver Detalles</div>
             </button>
-            <button className="radial-menu-item edit" onClick={() => handleActionClick('edit_project')} title="Editar Proyecto">
+            <button className="radial-menu-item edit" onClick={() => handleActionClick('edit_project')} tabIndex={0} aria-label="Editar Proyecto">
               <i className="bi bi-pencil-fill"></i>
               <div className="radial-menu-action-label">Editar Proyecto</div>
             </button>
-            <button className="radial-menu-item add-task" onClick={() => handleActionClick('add_task')} title="Añadir Tarea">
+            <button className="radial-menu-item add-task" onClick={() => handleActionClick('add_task')} tabIndex={0} aria-label="Añadir Tarea">
               <i className="bi bi-plus-lg"></i>
               <div className="radial-menu-action-label">Añadir Tarea</div>
             </button>
-            <button className="radial-menu-item add-collab" onClick={() => handleActionClick('add_collaborator')} title="Añadir Colaborador">
+            <button className="radial-menu-item add-collab" onClick={() => handleActionClick('add_collaborator')} tabIndex={0} aria-label="Añadir Colaborador">
               <i className="bi bi-person-plus-fill"></i>
               <div className="radial-menu-action-label">Añadir Colaborador</div>
             </button>
-            <button className="radial-menu-item delete" onClick={() => handleActionClick('delete_project')} title="Eliminar Proyecto">
+            <button className="radial-menu-item delete" onClick={() => handleActionClick('delete_project')} tabIndex={0} aria-label="Eliminar Proyecto">
               <i className="bi bi-trash-fill"></i>
               <div className="radial-menu-action-label-delete">Eliminar Proyecto</div>
             </button>
-            <button className="radial-menu-item cancel" onClick={toggleRadialMenu} title="Cancelar">
+            <button className="radial-menu-item cancel" onClick={toggleRadialMenu} tabIndex={0} aria-label="Cancelar">
               <i className="bi bi-x-lg"></i>
               <div className="radial-menu-action-label">Cancelar</div>
             </button>

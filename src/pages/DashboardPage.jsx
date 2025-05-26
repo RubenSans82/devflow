@@ -204,10 +204,11 @@ const DashboardPage = () => {
         break;
       case 'delete_project':
         setConfirmationModalConfig({
-          title: 'Confirmar Eliminación de Proyecto',
+          title: 'Confirmar Eliminación',
           message: '¿Estás seguro de que quieres eliminar este proyecto? Esta acción no se puede deshacer y eliminará todas las tareas asociadas.',
           onConfirm: async () => {
             try {
+              // Borrado real solo si el usuario confirma
               await import('../services/firestore').then(m => m.deleteProject(projectId));
               setShowConfirmationModal(false);
               setConfirmationModalConfig({
@@ -215,7 +216,6 @@ const DashboardPage = () => {
                 message: 'Proyecto eliminado con éxito.',
                 onConfirm: () => {
                   setShowConfirmationModal(false);
-                  // Recargar proyectos tras eliminar
                   setUserProjects(prev => prev.filter(p => p.id !== projectId));
                 },
                 confirmText: 'OK',
@@ -240,6 +240,8 @@ const DashboardPage = () => {
           cancelText: 'Cancelar',
           showCancelButton: true,
           confirmButtonClass: 'btn-danger',
+          onClose: () => setShowConfirmationModal(false),
+          isDeleteConfirmation: true
         });
         setShowConfirmationModal(true);
         break;
