@@ -120,7 +120,7 @@ const ProjectCard = ({ project, showDetailsButton = true, displayContext = 'home
             </button>
             <button className="radial-menu-item delete" onClick={() => handleActionClick('delete_project')} title="Eliminar Proyecto">
               <i className="bi bi-trash-fill"></i>
-              <div className="radial-menu-action-label">Eliminar Proyecto</div>
+              <div className="radial-menu-action-label-delete">Eliminar Proyecto</div>
             </button>
             <button className="radial-menu-item cancel" onClick={toggleRadialMenu} title="Cancelar">
               <i className="bi bi-x-lg"></i>
