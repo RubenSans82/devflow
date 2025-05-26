@@ -41,7 +41,7 @@ const HomePage = () => {
             <p className="hero-lead lead mb-4 animate__animated animate__fadeInUp animate__delay-1s">
               Tu plataforma definitiva para la gestión de proyectos de desarrollo. Colabora, organiza y alcanza tus metas con DevFlow.
             </p>
-            <Link to="/projects" className="hero-cta-button btn btn-primary btn-lg animate__animated animate__fadeInUp animate__delay-2s">
+            <Link to="/login" className="hero-cta-button btn btn-primary btn-lg animate__animated animate__fadeInUp animate__delay-2s">
               Comenzar
             </Link>
           </div>

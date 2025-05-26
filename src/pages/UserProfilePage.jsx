@@ -1,15 +1,16 @@
 // src/pages/UserProfilePage.jsx
 import React, { useState, useEffect } from 'react'; // Añadido useEffect
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import ConfirmationModal from '../components/ConfirmationModal';
 import { deleteUserAccount } from '../services/auth';
 import { getUserDocument } from '../services/firestore'; // Importar getUserDocument
-// import { deleteAllUserProjects } from '../services/firestore';
+import { auth } from '../../firebaseConfig'; // CORREGIDO: Importar auth desde firebaseConfig
+import { signOut } from 'firebase/auth'; // Para el botón de cerrar sesión
 
 const UserProfilePage = () => {
   const { currentUser, logout } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Hook para la navegación
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState('');
   const [profileData, setProfileData] = useState(null); // Estado para datos de Firestore
@@ -53,11 +54,12 @@ const UserProfilePage = () => {
 
   const handleLogout = async () => {
     try {
-      await logout();
-      navigate('/login');
+      await signOut(auth);
+      // Opcional: Redirigir al usuario a la página de inicio o login
+      navigate('/login'); 
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
-      // Manejar error de logout, ej. mostrar notificación
+      // Manejar el error, por ejemplo, mostrando un mensaje al usuario
     }
   };
 
@@ -87,7 +89,24 @@ const UserProfilePage = () => {
   };
 
   if (loadingProfile) {
-    return <div className="container mt-5"><p>Cargando perfil...</p></div>;
+    return (
+      <div className="container mt-5 text-center">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Cargando perfil...</span>
+        </div>
+        <p className="mt-2">Cargando perfil...</p>
+      </div>
+    );
+  }
+
+  if (deleteError) {
+    return (
+      <div className="container mt-5">
+        <div className="alert alert-danger" role="alert">
+          {deleteError}
+        </div>
+      </div>
+    );
   }
 
   if (!currentUser || !profileData) { // Comprobar también profileData
@@ -100,31 +119,69 @@ const UserProfilePage = () => {
   const photoURLToShow = profileData.photoURL || currentUser.photoURL; // currentUser.photoURL como fallback para la imagen
 
   return (
-    <div className="container profile-page-container"> {/* Eliminado py-5, el padding vertical se maneja en CSS */}
-      <div className="card profile-card"> {/* .profile-card ya tiene max-width: 600px desde CSS */}
-        <div className="card-header">
-          <h2 className="mb-0 dashboard-title-tech">Perfil de Usuario</h2>
-        </div>
-        <div className="card-body text-center">
-          {photoURLToShow && (
-            <img 
-              src={photoURLToShow} 
-              alt={displayNameToShow || 'Avatar del usuario'}
-              className="img-fluid rounded-circle mb-3" 
-              style={{ width: '150px', height: '150px', objectFit: 'cover' }}
-            />
-          )}
-          <h4>{displayNameToShow}</h4>
-          <p className="text-muted">{emailToShow}</p>
-          {deleteError && <p className="text-danger mt-2">{deleteError}</p>}
-        </div>
-        <div className="card-footer d-flex justify-content-between">
-          <button onClick={handleLogout} className="btn btn-outline-secondary">
-            Cerrar Sesión
-          </button>
-          <button onClick={openConfirmDeleteModal} className="btn btn-outline-danger">
-            Eliminar Cuenta
-          </button>
+    <div className="container mt-4 mb-5"> 
+      <div className="row justify-content-center">
+        <div className="col-md-8 col-lg-6"> 
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h1 className="dashboard-title-tech">Perfil de Usuario</h1>
+            {/* Aquí se podrían añadir botones de acción si fueran necesarios */}
+          </div>
+          <div className="card shadow-sm"> 
+            <div className="card-body">
+              <div className="text-center mb-4">
+                {profileData.photoURL ? (
+                  <img 
+                    src={profileData.photoURL} 
+                    alt="Foto de perfil" 
+                    className="img-fluid rounded-circle border border-primary p-1" 
+                    style={{ width: '150px', height: '150px', objectFit: 'cover' }} 
+                  />
+                ) : (
+                  <div 
+                    className="d-flex justify-content-center align-items-center rounded-circle bg-secondary text-white border border-primary p-1" 
+                    style={{ width: '150px', height: '150px', fontSize: '3rem' }}
+                  >
+                    {profileData.displayName ? profileData.displayName.charAt(0).toUpperCase() : <i className="bi bi-person-fill"></i>}
+                  </div>
+                )}
+              </div>
+
+              <h3 className="text-center mb-3">{profileData.displayName || 'Usuario sin nombre'}</h3>
+              <p className="text-center text-muted mb-4">{profileData.email}</p>
+
+              <ul className="list-group list-group-flush mb-4">
+                <li className="list-group-item d-flex justify-content-between align-items-center">
+                  <strong>ID de Usuario:</strong>
+                  <span className="text-muted">{currentUser.uid}</span>
+                </li>
+                {profileData.metadata?.creationTime && (
+                  <li className="list-group-item d-flex justify-content-between align-items-center">
+                    <strong>Miembro desde:</strong>
+                    <span className="text-muted">{new Date(profileData.metadata.creationTime).toLocaleDateString()}</span>
+                  </li>
+                )}
+                {profileData.metadata?.lastSignInTime && (
+                  <li className="list-group-item d-flex justify-content-between align-items-center">
+                    <strong>Último acceso:</strong>
+                    <span className="text-muted">{new Date(profileData.metadata.lastSignInTime).toLocaleString()}</span>
+                  </li>
+                )}
+              </ul>
+              
+              {/* Aquí podrías añadir más información o acciones, como "Editar Perfil" */}
+              {/* <button className="btn btn-outline-primary w-100 mb-3">
+                <i className="bi bi-pencil-square me-2"></i>Editar Perfil (Próximamente)
+              </button> */}
+              
+              <button 
+                onClick={handleLogout} 
+                className="btn btn-outline-danger w-100"
+              >
+                <i className="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+              </button>
+
+            </div>
+          </div>
         </div>
       </div>
 

@@ -154,10 +154,11 @@ const EditProjectPage = () => {
   return (
     <div className="container mt-5">
       <div className="row justify-content-center">
-        <div className="col-md-8 col-lg-7">
-          <h2 className="mb-4 dashboard-title-tech text-center">
-            Editar: <span style={{wordBreak: 'break-word'}}>{originalProject.title}</span>
-          </h2>
+        <div className="col-md-8 col-lg-6"> {/* Igual que UserProfilePage */}
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h1 className="dashboard-title-tech">Editar: <span style={{wordBreak: 'break-word'}}>{originalProject.title}</span></h1>
+            {/* Aquí se podrían añadir botones de acción si fueran necesarios */}
+          </div>
           <div className="card">
             <div className="card-body">
               <form onSubmit={handleSubmit}>
