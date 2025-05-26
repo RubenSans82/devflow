@@ -117,7 +117,68 @@ const DashboardPage = () => {
         setShowCreateTaskModal(true);
         break;
       case 'add_collaborator':
-        console.log('Abrir modal para añadir colaborador al proyecto:', projectId);
+        setConfirmationModalConfig({
+          title: 'Añadir Colaborador',
+          message: 'Introduce el email del colaborador que deseas añadir a este proyecto.',
+          onConfirm: async () => {
+            // Guardar el email temporalmente en el estado
+            if (!window._addCollabEmail || !window._addCollabEmail.trim()) {
+              setConfirmationModalConfig(prev => ({
+                ...prev,
+                title: 'Error',
+                message: 'Debes introducir un email válido.',
+                onConfirm: () => setShowConfirmationModal(false),
+                confirmText: 'Cerrar',
+                showCancelButton: false,
+                confirmButtonClass: 'btn-danger',
+              }));
+              setShowConfirmationModal(true);
+              return;
+            }
+            try {
+              const users = await import('../services/firestore').then(m => m.getAllUsers());
+              const userToAdd = users.find(u => u.email === window._addCollabEmail.trim());
+              if (!userToAdd) throw new Error('Usuario no encontrado con ese email.');
+              await import('../services/firestore').then(m => m.addCollaboratorToProject(projectId, userToAdd.id));
+              setShowConfirmationModal(false);
+              setConfirmationModalConfig({
+                title: 'Éxito',
+                message: `Colaborador añadido correctamente al proyecto.`,
+                onConfirm: () => setShowConfirmationModal(false),
+                confirmText: 'OK',
+                showCancelButton: false,
+                confirmButtonClass: 'btn-success',
+              });
+              setShowConfirmationModal(true);
+            } catch (err) {
+              setShowConfirmationModal(false);
+              setConfirmationModalConfig({
+                title: 'Error',
+                message: `No se pudo añadir el colaborador: ${err.message}`,
+                onConfirm: () => setShowConfirmationModal(false),
+                confirmText: 'Cerrar',
+                showCancelButton: false,
+                confirmButtonClass: 'btn-danger',
+              });
+              setShowConfirmationModal(true);
+            }
+          },
+          confirmText: 'Añadir',
+          cancelText: 'Cancelar',
+          showCancelButton: true,
+          confirmButtonClass: 'btn-primary',
+          // Renderizar input manualmente en el modal
+          customContent: (
+            <input
+              type="email"
+              className="form-control mt-3"
+              placeholder="Email del colaborador"
+              onChange={e => (window._addCollabEmail = e.target.value)}
+              autoFocus
+            />
+          ),
+        });
+        setShowConfirmationModal(true);
         break;
       case 'delete_project':
         setConfirmationModalConfig({
@@ -268,6 +329,7 @@ const DashboardPage = () => {
         cancelText={confirmationModalConfig.cancelText}
         showCancelButton={confirmationModalConfig.showCancelButton}
         confirmButtonClass={confirmationModalConfig.confirmButtonClass}
+        customContent={confirmationModalConfig.customContent} // Añadido para soportar contenido personalizado
       />
     </div>
   );

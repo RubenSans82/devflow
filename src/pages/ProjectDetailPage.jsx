@@ -502,18 +502,22 @@ const ProjectDetailPage = () => {
                   if (validCollaborators && validCollaborators.length > 0) {
                     return (
                       <ul className="list-group">
-                        {validCollaborators.map((collabId, index) => (
-                          <li key={collabId || index} className="list-group-item d-flex justify-content-between align-items-center">
-                            {/* Intenta obtener el nombre del colaborador. Si no está en collaboratorNames, muestra el ID. */}
-                            {(project.collaboratorNames && project.collaboratorNames[project.collaborators.indexOf(collabId)]) || collabId}
-                            <button 
-                              className="btn btn-sm btn-outline-danger" 
-                              onClick={() => handleRemoveCollaborator(collabId)}
-                            >
-                              <i className="bi bi-person-dash-fill"></i>
-                            </button>
-                          </li>
-                        ))}
+                        {validCollaborators.map((collabId, index) => {
+                          // Buscar el usuario en el array de usuarios cargados
+                          const userObj = users.find(u => u.id === collabId);
+                          const displayName = userObj ? (userObj.displayName || userObj.githubUsername || userObj.email) : collabId;
+                          return (
+                            <li key={collabId || index} className="list-group-item d-flex justify-content-between align-items-center">
+                              {displayName}
+                              <button 
+                                className="btn btn-sm btn-outline-danger" 
+                                onClick={() => handleRemoveCollaborator(collabId)}
+                              >
+                                <i className="bi bi-person-dash-fill"></i>
+                              </button>
+                            </li>
+                          );
+                        })}
                       </ul>
                     );
                   } else {

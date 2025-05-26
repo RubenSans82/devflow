@@ -12,6 +12,7 @@ const ConfirmationModal = ({
   cancelText = 'Cancelar',
   confirmButtonClass = 'btn-primary',
   showCancelButton = true,
+  customContent, // Nuevo prop para contenido personalizado
 }) => {
   if (!isOpen) {
     return null;
@@ -27,6 +28,7 @@ const ConfirmationModal = ({
           </div>
           <div className="modal-body">
             <p>{message}</p>
+            {customContent && <div>{customContent}</div>}
           </div>
           <div className="modal-footer">
             {showCancelButton && (
@@ -54,6 +56,7 @@ ConfirmationModal.propTypes = {
   cancelText: PropTypes.string,
   confirmButtonClass: PropTypes.string,
   showCancelButton: PropTypes.bool,
+  customContent: PropTypes.node, // Añadido para contenido personalizado
 };
 
 export default ConfirmationModal;
