@@ -300,6 +300,19 @@ export const getAllUsers = async () => {
   }
 };
 
+// Obtener proyectos donde el usuario es colaborador (pero no owner)
+export const getProjectsWhereUserIsCollaborator = async (userId) => {
+  const q = query(
+    collection(db, PROJECTS_COLLECTION),
+    where("collaborators", "array-contains", userId)
+  );
+  const querySnapshot = await getDocs(q);
+  // Filtrar para excluir los que es owner
+  return querySnapshot.docs
+    .map(doc => ({ id: doc.id, ...doc.data() }))
+    .filter(project => project.ownerId !== userId);
+};
+
 // Añadir solicitud de colaboración (notificación al owner)
 export const addCollaborationRequestNotification = async ({ projectId, projectTitle, ownerId, requesterId, requesterName }) => {
   if (!projectId || !ownerId || !requesterId) throw new Error('Faltan datos para la notificación');

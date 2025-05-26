@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'; // useEffect añadido
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { getUserProjects, getUserDocument } from '../services/firestore'; // getUserDocument añadido
+import { getUserProjects, getUserDocument, getProjectsWhereUserIsCollaborator } from '../services/firestore'; // Añadido getProjectsWhereUserIsCollaborator
 import ProjectCard from '../components/ProjectCard';
 import CreateTaskModal from '../components/CreateTaskModal'; // Importar CreateTaskModal
 import ConfirmationModal from '../components/ConfirmationModal'; // Importar ConfirmationModal
@@ -31,6 +31,14 @@ const DashboardPage = () => {
     showCancelButton: true,
     confirmButtonClass: 'btn-primary',
   });
+
+  // Estado para tabs
+  const [activeTab, setActiveTab] = useState('owner'); // 'owner' | 'collab'
+
+  // Estado para proyectos donde soy colaborador
+  const [collabProjects, setCollabProjects] = useState([]);
+  const [loadingCollab, setLoadingCollab] = useState(true);
+  const [errorCollab, setErrorCollab] = useState('');
 
   useEffect(() => {
     if (currentUser?.uid) {
@@ -78,6 +86,20 @@ const DashboardPage = () => {
         setLoadingProjects(false);
       };
       fetchUserProjects();
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser) {
+      setLoadingCollab(true);
+      setErrorCollab('');
+      getProjectsWhereUserIsCollaborator(currentUser.uid)
+        .then(projects => setCollabProjects(projects))
+        .catch(err => {
+          setErrorCollab('Error al cargar tus colaboraciones.');
+          console.error('Error fetching collab projects:', err);
+        })
+        .finally(() => setLoadingCollab(false));
     }
   }, [currentUser]);
 
@@ -248,54 +270,98 @@ const DashboardPage = () => {
     <div className="container mt-5">
       <div className="d-flex justify-content-between align-items-center mb-5">
         <h1 className="dashboard-title-tech">Dashboard de {displayName}</h1>
-        {/* Botón Crear Nuevo Proyecto para escritorio, alineado a la derecha del título principal */}
         <Link to="/create-project" className="btn btn-outline-primary btn-pulse-glow d-none d-md-inline-block"> 
           <i className="bi bi-plus-circle-fill me-2"></i>Crear Nuevo Proyecto
         </Link>
       </div>
 
-      {/* Título "Mis Proyectos" para escritorio (ahora solo el título) */}
-      <div className="d-none d-md-block mt-5 mb-4"> 
-        <h2 className="dashboard-title-tech-subtitle">Mis Proyectos</h2>
-      </div>
+      {/* Tabs */}
+      <ul className="nav nav-tabs mb-4">
+        <li className="nav-item">
+          <button className={`nav-link${activeTab === 'owner' ? ' active' : ''}`} onClick={() => setActiveTab('owner')}>
+            Mis proyectos
+          </button>
+        </li>
+        <li className="nav-item">
+          <button className={`nav-link${activeTab === 'collab' ? ' active' : ''}`} onClick={() => setActiveTab('collab')}>
+            Mis colaboraciones
+          </button>
+        </li>
+      </ul>
 
-      {/* Título "Mis Proyectos" para móviles (sin el botón al lado) */}
-      <div className="d-md-none mt-5 mb-4"> {/* mt-5 añadido, mb-3 cambiado a mb-4 */}
-        <h2 className="dashboard-title-tech-subtitle">Mis Proyectos</h2>
-      </div>
-
-      {/* Botón de Acción Flotante (FAB) para móviles */}
-      <Link to="/create-project" className="fab-mobile d-md-none"> {/* Visible solo en móviles (d-md-none) */}
-        <i className="bi bi-plus-lg"></i> {/* Icono más grande para FAB */}
-      </Link>
-
-      {loadingProjects ? (
-        <div className="text-center">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Cargando tus proyectos...</span>
+      {/* Contenido de cada tab */}
+      {activeTab === 'owner' && (
+        <>
+          <div className="d-none d-md-block mt-5 mb-4"> 
+            <h2 className="dashboard-title-tech-subtitle">Mis Proyectos</h2>
           </div>
-        </div>
-      ) : errorProjects ? (
-        <div className="alert alert-danger">{errorProjects}</div>
-      ) : userProjects.length === 0 ? (
-        <div className="alert alert-info">
-          No has creado ningún proyecto todavía. 
-          <Link to="/create-project">¡Crea tu primer proyecto!</Link>
-        </div>
-      ) : (
-        <div className="projects-list-page-styles-wrapper">
-          <div className="row g-4">
-            {userProjects.map(project => (
-              <div key={project.id} className="col-12 col-md-6 col-lg-4 d-flex align-items-stretch plist-card-column-wrapper">
-                <ProjectCard 
-                  project={project} 
-                  displayContext="dashboard" 
-                  onRadialAction={handleRadialAction} 
-                />
+          <div className="d-md-none mt-5 mb-4">
+            <h2 className="dashboard-title-tech-subtitle">Mis Proyectos</h2>
+          </div>
+          <Link to="/create-project" className="fab-mobile d-md-none">
+            <i className="bi bi-plus-lg"></i>
+          </Link>
+          {loadingProjects ? (
+            <div className="text-center">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Cargando tus proyectos...</span>
               </div>
-            ))}
+            </div>
+          ) : errorProjects ? (
+            <div className="alert alert-danger">{errorProjects}</div>
+          ) : userProjects.length === 0 ? (
+            <div className="alert alert-info">
+              No has creado ningún proyecto todavía. 
+              <Link to="/create-project">¡Crea tu primer proyecto!</Link>
+            </div>
+          ) : (
+            <div className="projects-list-page-styles-wrapper">
+              <div className="row g-4">
+                {userProjects.map(project => (
+                  <div key={project.id} className="col-12 col-md-6 col-lg-4 d-flex align-items-stretch plist-card-column-wrapper">
+                    <ProjectCard 
+                      project={project} 
+                      displayContext="dashboard" 
+                      onRadialAction={handleRadialAction} 
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+      {activeTab === 'collab' && (
+        <>
+          <div className="mt-5 mb-4">
+            <h2 className="dashboard-title-tech-subtitle">Mis Colaboraciones</h2>
           </div>
-        </div>
+          {loadingCollab ? (
+            <div className="text-center">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Cargando tus colaboraciones...</span>
+              </div>
+            </div>
+          ) : errorCollab ? (
+            <div className="alert alert-danger">{errorCollab}</div>
+          ) : collabProjects.length === 0 ? (
+            <div className="alert alert-info">No colaboras en ningún proyecto actualmente.</div>
+          ) : (
+            <div className="projects-list-page-styles-wrapper">
+              <div className="row g-4">
+                {collabProjects.map(project => (
+                  <div key={project.id} className="col-12 col-md-6 col-lg-4 d-flex align-items-stretch plist-card-column-wrapper">
+                    <ProjectCard 
+                      project={project} 
+                      displayContext="projectsList" 
+                      showDetailsButton={true}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Modal para crear tarea */}
