@@ -123,10 +123,12 @@ const NotificationCenter = () => {
   return (
     <div className="dropdown" ref={dropdownRef} style={{ position: 'relative' }}>
       <button
-        className={`btn btn-outline-primary position-relative${open ? ' active' : ''}`}
+        className={`notification-bell-btn btn btn-outline-primary position-relative${open ? ' open' : ''}`}
         onClick={() => setOpen((v) => !v)}
         aria-label="Notificaciones"
         style={{ border: 'none', background: 'none', padding: 0 }}
+        onMouseEnter={e => e.currentTarget.classList.add('open')}
+        onMouseLeave={e => !open && e.currentTarget.classList.remove('open')}
       >
         <i className="bi bi-bell" style={{ fontSize: '1.5rem' }}></i>
         {unreadCount > 0 && (

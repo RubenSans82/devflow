@@ -1191,7 +1191,7 @@ input:-webkit-autofill:active {
   border: none !important;
   filter: 
     drop-shadow(0 0 8px var(--df-primary-light)) /* Más extendido */
-    drop-shadow(0 0 16px rgba(var(--df-primary-light-rgb), 0.95)); /* Mucho más intenso y opaco */
+    drop-shadow(0 0 16px rgba(var(--df-primary-light), 0.95)); /* Mucho más intenso y opaco */
 }
 
 .radial-menu-item.delete {
@@ -1447,5 +1447,40 @@ input:-webkit-autofill:active {
   text-decoration: none !important;
   box-shadow: 0 0 12px 2px var(--df-accent-primary), 0 0 24px 4px rgba(var(--df-accent-primary-rgb), 0.4);
   filter: brightness(1.15);
+}
+
+/* --- Tabs Dashboard: línea y borde de la pestaña activa en azul neón --- */
+.nav-tabs {
+  border-bottom: 2.5px solid var(--df-accent-primary) !important;
+}
+
+.nav-tabs .nav-link {
+  border: 1.5px solid transparent;
+  color: var(--df-text-secondary) !important;
+  background: transparent !important;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--df-accent-primary) !important;
+  background: rgba(var(--df-accent-primary-rgb), 0.08) !important;
+  border: 2.5px solid var(--df-accent-primary) !important;
+  border-bottom: none !important;
+  box-shadow: 0 0 8px 1.5px var(--df-accent-primary), 0 0 18px 3px rgba(var(--df-accent-primary-rgb), 0.35);
+  z-index: 2;
+}
+
+.nav-tabs .nav-link:not(.active):hover {
+  color: var(--df-accent-primary) !important;
+  border-color: var(--df-accent-primary) !important;
+}
+
+/* Notificación campana: color secundario por defecto, azul neón en hover o abierto */
+.notification-bell-btn, .notification-bell-btn .bi-bell {
+  color: var(--df-text-secondary) !important;
+  transition: color 0.2s;
+}
+.notification-bell-btn:hover, .notification-bell-btn:focus, .notification-bell-btn.open, .notification-bell-btn.open .bi-bell {
+  color: var(--df-accent-primary) !important;
 }
 

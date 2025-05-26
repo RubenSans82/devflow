@@ -578,10 +578,11 @@ const ProjectDetailPage = () => {
                       task={task} 
                       projectOwnerId={project?.ownerId}
                       onStatusChange={handleTaskStatusChange}
-                      onEdit={canManageTasks ? handleEditTask : undefined} // Pasar función directa
-                      onDelete={canManageTasks ? handleDeleteTask : undefined} // Pasar función directa
+                      onEdit={canManageTasks ? handleEditTask : undefined}
+                      onDelete={canManageTasks ? handleDeleteTask : undefined}
                       users={users}
                       canManage={canManageTasks}
+                      collaborators={project?.collaborators || []} // Pasar lista de colaboradores
                     />
                   ))}
                 </ul>

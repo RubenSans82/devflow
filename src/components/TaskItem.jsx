@@ -41,7 +41,7 @@ const formatDate = (dateFieldValue) => {
   return 'Fecha inválida'; // O algún valor por defecto o manejo de error
 };
 
-const TaskItem = ({ task, projectOwnerId, onEdit, onDelete, onStatusChange }) => {
+const TaskItem = ({ task, projectOwnerId, onEdit, onDelete, onStatusChange, collaborators = [] }) => {
   const { currentUser } = useAuth();
   const [creatorDisplayName, setCreatorDisplayName] = useState('');
   const [assignedToDisplayName, setAssignedToDisplayName] = useState('');
@@ -62,7 +62,8 @@ const TaskItem = ({ task, projectOwnerId, onEdit, onDelete, onStatusChange }) =>
 
   const isCreator = currentUser && currentUser.uid === task.creatorId;
   const isProjectOwner = currentUser && currentUser.uid === projectOwnerId;
-  const canModify = isCreator || isProjectOwner;
+  const isCollaborator = currentUser && collaborators && collaborators.includes(currentUser.uid);
+  const canModify = isCreator || isProjectOwner || isCollaborator;
 
   return (
     <li className="list-group-item mb-3 shadow-sm p-3">
@@ -178,6 +179,7 @@ TaskItem.propTypes = {
   onEdit: PropTypes.func,       
   onDelete: PropTypes.func,     
   onStatusChange: PropTypes.func, 
+  collaborators: PropTypes.array, // Añadido para saber si el usuario es colaborador
 };
 
 export default TaskItem;
