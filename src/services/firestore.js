@@ -299,3 +299,63 @@ export const getAllUsers = async () => {
     throw error;
   }
 };
+
+// Añadir solicitud de colaboración (notificación al owner)
+export const addCollaborationRequestNotification = async ({ projectId, projectTitle, ownerId, requesterId, requesterName }) => {
+  if (!projectId || !ownerId || !requesterId) throw new Error('Faltan datos para la notificación');
+  try {
+    const notification = {
+      type: 'collaboration_request',
+      projectId,
+      projectTitle,
+      ownerId,
+      requesterId,
+      requesterName,
+      status: 'pending',
+      createdAt: Timestamp.now(),
+      read: false
+    };
+    await addDoc(collection(db, 'notifications'), notification);
+  } catch (error) {
+    console.error('Error al crear notificación de colaboración:', error);
+    throw error;
+  }
+};
+
+// Obtener notificaciones para un usuario
+export const getNotificationsForUser = async (userId) => {
+  // Devuelve notificaciones donde el usuario es owner o requester
+  const qOwner = query(collection(db, 'notifications'), where('ownerId', '==', userId));
+  const qRequester = query(collection(db, 'notifications'), where('requesterId', '==', userId));
+  const [ownerSnap, requesterSnap] = await Promise.all([
+    getDocs(qOwner),
+    getDocs(qRequester)
+  ]);
+  // Unir y eliminar duplicados por id
+  const all = [...ownerSnap.docs, ...requesterSnap.docs];
+  const unique = Array.from(new Map(all.map(doc => [doc.id, { id: doc.id, ...doc.data() }])).values());
+  // Ordenar por fecha descendente si existe createdAt
+  unique.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+  return unique;
+};
+
+// Marcar notificación como leída
+export const markNotificationAsRead = async (notifId) => {
+  const notifRef = doc(db, 'notifications', notifId);
+  await updateDoc(notifRef, { read: true });
+};
+
+// Aceptar solicitud de colaboración
+export const acceptCollaborationRequest = async (notif) => {
+  // Añadir colaborador al proyecto
+  await addCollaboratorToProject(notif.projectId, notif.requesterId);
+  // Actualizar notificación
+  const notifRef = doc(db, 'notifications', notif.id);
+  await updateDoc(notifRef, { status: 'accepted', read: true });
+};
+
+// Rechazar solicitud de colaboración
+export const rejectCollaborationRequest = async (notif) => {
+  const notifRef = doc(db, 'notifications', notif.id);
+  await updateDoc(notifRef, { status: 'rejected', read: true });
+};

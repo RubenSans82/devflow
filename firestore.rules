@@ -59,5 +59,12 @@ service cloud.firestore {
       allow create: if request.auth != null && request.auth.uid == userId;
       allow update: if request.auth != null && request.auth.uid == userId;
     }
+
+    match /notifications/{notificationId} {
+      allow create: if request.auth != null && request.resource.data.requesterId == request.auth.uid;
+      allow read: if request.auth != null && (resource.data.ownerId == request.auth.uid || resource.data.requesterId == request.auth.uid);
+      allow update: if false;
+      allow delete: if false;
+    }
   }
 }

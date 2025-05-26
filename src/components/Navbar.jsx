@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext'; // Importar hook de autenticación
 import { getUserDocument } from '../services/firestore'; // Importar para obtener githubUsername
 import logo from '../assets/logo.png'; // Importar el logo
+import NotificationCenter from './NotificationCenter';
 
 const Navbar = () => {
   const { currentUser, logout } = useAuth(); // Obtener usuario actual y función de logout
@@ -50,7 +51,12 @@ const Navbar = () => {
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto align-items-center"> {/* Añadida clase align-items-center */}
+          <ul className="navbar-nav ms-auto align-items-center">
+            {currentUser && (
+              <li className="nav-item me-2">
+                <NotificationCenter />
+              </li>
+            )}
             {currentUser ? (
               <>
                 <li className="nav-item">

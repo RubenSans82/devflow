@@ -1,10 +1,16 @@
 // src/components/ProjectCard.jsx
 import React, { useState } from 'react'; // Añadido useState
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { addCollaborationRequestNotification } from '../services/firestore';
 
 // Acepta nuevas props: displayContext y onRadialAction
 const ProjectCard = ({ project, showDetailsButton = true, displayContext = 'home', onRadialAction }) => {
   const [isRadialMenuOpen, setIsRadialMenuOpen] = useState(false);
+  const { currentUser } = useAuth ? useAuth() : { currentUser: null };
+  const [requesting, setRequesting] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
+  const [toast, setToast] = useState({ show: false, type: '', message: '' });
 
   if (!project) {
     return null;
@@ -30,13 +36,54 @@ const ProjectCard = ({ project, showDetailsButton = true, displayContext = 'home
 
   // Estilo para la página de listado de proyectos (ProjectsListPage.jsx)
   if (displayContext === 'projectsList') {
+    const isOwner = currentUser && project.ownerId === currentUser.uid;
+    const isCollaborator = currentUser && project.collaborators && project.collaborators.includes(currentUser.uid);
+    const canRequest = currentUser && !isOwner && !isCollaborator;
+
+    const handleRequestCollab = async (e) => {
+      e.preventDefault();
+      setRequesting(true);
+      setToast({ show: false, type: '', message: '' });
+      try {
+        await addCollaborationRequestNotification({
+          projectId: project.id,
+          projectTitle: project.title,
+          ownerId: project.ownerId,
+          requesterId: currentUser.uid,
+          requesterName: currentUser.displayName || currentUser.email
+        });
+        setRequestSent(true);
+        setToast({ show: true, type: 'success', message: 'Solicitud enviada correctamente.' });
+      } catch (err) {
+        setToast({ show: true, type: 'error', message: 'Error al solicitar colaboración: ' + (err.message || err) });
+      }
+      setRequesting(false);
+    };
+
     return (
-      <Link to={`/project/${project.id}`} className="project-card-link-wrapper" style={{ textDecoration: 'none' }}>
-        <div className="project-card"> {/* Clase principal del HTML de referencia */}
-          <div className="card-content"> {/* Contenedor de contenido del HTML de referencia */}
-            <h3 className="card-title">{project.title}</h3> {/* Título del HTML de referencia */}
-            <p className="card-description">{project.description}</p> {/* Descripción del HTML de referencia */}
-            {/* El botón "Ver Detalles" se ha eliminado */}
+      <Link to={`/project/${project.id}`} className="project-card-link-wrapper" style={{ textDecoration: 'none', position: 'relative' }}>
+        <div className="project-card">
+          <div className="card-content" style={{ position: 'relative', minHeight: 120 }}>
+            <h3 className="card-title">{project.title}</h3>
+            <p className="card-description">{project.description}</p>
+            {/* Botón para solicitar ser colaborador, abajo a la izquierda */}
+            {canRequest && (
+              <button
+                className="btn btn-outline-primary btn-sm mt-2"
+                style={{ position: 'absolute', left: 0, bottom: 0, margin: 12, zIndex: 2 }}
+                onClick={handleRequestCollab}
+                disabled={requesting || requestSent}
+                title="Solicitar ser colaborador"
+              >
+                {requesting ? (
+                  <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                ) : requestSent ? (
+                  <i className="bi bi-check2-circle"></i>
+                ) : (
+                  <i className="bi bi-plus-circle"></i>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </Link>
@@ -73,7 +120,7 @@ const ProjectCard = ({ project, showDetailsButton = true, displayContext = 'home
             </button>
             <button className="radial-menu-item delete" onClick={() => handleActionClick('delete_project')} title="Eliminar Proyecto">
               <i className="bi bi-trash-fill"></i>
-              <div className="radial-menu-action-label-delete">Eliminar Proyecto</div>
+              <div className="radial-menu-action-label">Eliminar Proyecto</div>
             </button>
             <button className="radial-menu-item cancel" onClick={toggleRadialMenu} title="Cancelar">
               <i className="bi bi-x-lg"></i>
@@ -103,3 +150,11 @@ const ProjectCard = ({ project, showDetailsButton = true, displayContext = 'home
 };
 
 export default ProjectCard;
+
+// Auto-ocultar el toast después de 3 segundos
+React.useEffect(() => {
+  if (toast.show) {
+    const timer = setTimeout(() => setToast(t => ({ ...t, show: false })), 3000);
+    return () => clearTimeout(timer);
+  }
+}, [toast.show]);
