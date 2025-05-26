@@ -1522,7 +1522,7 @@ input:-webkit-autofill:active {
 
 /* Notificación campana: color secundario por defecto, azul neón en hover o abierto */
 .notification-bell-btn, .notification-bell-btn .bi-bell {
-  color: var(--df-text-primary) !important;
+  color: var(--df-text-secondary) !important;
   box-shadow: none;
   transition: box-shadow 0.2s, color 0.2s;
 }

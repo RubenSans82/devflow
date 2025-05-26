@@ -136,7 +136,23 @@ const NotificationCenter = () => {
         )}
       </button>
       {open && (
-        <div className="dropdown-menu show p-0" style={{ minWidth: 320, right: 0, left: 'auto', maxHeight: 350, overflowY: 'auto', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+        <div
+          className={`dropdown-menu show p-0 notification-dropdown-menu${open ? ' open' : ''}`}
+          style={{
+            minWidth: 320,
+            right: 0,
+            left: 'auto',
+            maxHeight: 350,
+            overflowY: 'auto',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+            bottom: window.innerWidth < 768 ? '60px' : 'auto', // Para móviles: despliega hacia arriba
+            top: window.innerWidth < 768 ? 'auto' : '100%',    // Para móviles: no top, sí bottom
+            position: 'absolute',
+            transform: window.innerWidth < 768 ? 'translateY(-100%) translateX(30%)' : 'none',
+            borderRadius: '12px',
+            zIndex: 2000
+          }}
+        >
           <div className="p-3 border-bottom fw-bold bg-dark text-light">Notificaciones</div>
           <ul className="list-group list-group-flush">
             {loading ? (
