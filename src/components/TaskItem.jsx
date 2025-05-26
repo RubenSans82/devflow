@@ -104,7 +104,7 @@ const TaskItem = ({ task, projectOwnerId, onEdit, onDelete, onStatusChange }) =>
             {canModify && onEdit && (
               <button 
                 className="btn btn-outline-primary btn-sm me-2" 
-                onClick={onEdit} // CAMBIADO: de () => onEdit(task) a solo onEdit
+                onClick={() => onEdit(task)} // CORREGIDO: pasar la tarea, no el evento
                 aria-label="Editar tarea"
               >
                 <i className="bi bi-pencil-square"></i> Editar

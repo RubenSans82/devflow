@@ -13,32 +13,37 @@ const EditTaskModal = ({ task, isOpen, onClose, onSubmit }) => {
   const [error, setError] = useState(''); // Estado para el mensaje de error
   const modalRef = useRef(); // Ref para el contenido del modal
 
+  // 1. Cargar usuarios solo cuando el modal se abre
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const allUsers = await getAllUsers();
-        if (task && task.creatorId) {
-          setUsers(allUsers.filter(u => u.id !== task.creatorId));
-        } else {
-          setUsers(allUsers);
-        }
-      } catch (err) {
-        console.error("Error fetching users:", err);
-        setError("No se pudieron cargar los usuarios. Inténtalo de nuevo más tarde."); // Informar al usuario
-      }
-    };
-
     if (isOpen) {
-      setError(''); // Limpiar errores previos al abrir o recargar
+      const fetchUsers = async () => {
+        try {
+          const allUsers = await getAllUsers();
+          if (task && task.creatorId) {
+            setUsers(allUsers.filter(u => u.id !== task.creatorId));
+          } else {
+            setUsers(allUsers);
+          }
+        } catch (err) {
+          console.error("Error fetching users:", err);
+          setError("No se pudieron cargar los usuarios. Inténtalo de nuevo más tarde.");
+        }
+      };
       fetchUsers();
+    } else {
+      setUsers([]);
     }
+  }, [isOpen, task]);
 
-    if (task) {
+  // 2. Inicializar campos del formulario cuando cambia la tarea
+  useEffect(() => {
+    if (task && isOpen) {
+      console.log('[EditTaskModal] Inicializando campos con task:', task);
       setTitle(task.title || '');
       setDescription(task.description || '');
       setStatus(task.status || 'pendiente');
       setPriority(task.priority || 'media');
-      setAssignedTo(task.assignedTo || ''); // Establecer assignedTo
+      setAssignedTo(task.assignedTo || '');
       // Formatear dueDate para el input type="date" (YYYY-MM-DD)
       if (task.dueDate && task.dueDate.seconds) {
         const date = new Date(task.dueDate.seconds * 1000);
@@ -49,17 +54,22 @@ const EditTaskModal = ({ task, isOpen, onClose, onSubmit }) => {
       } else {
         setDueDate('');
       }
-    } else {
-      // Resetear campos si no hay tarea (o al cerrar y reabrir para una nueva tarea)
+      setError('');
+    }
+  }, [task, isOpen]);
+
+  // 3. Limpiar campos solo al cerrar el modal
+  useEffect(() => {
+    if (!isOpen) {
       setTitle('');
       setDescription('');
       setStatus('pendiente');
       setPriority('media');
       setDueDate('');
-      setAssignedTo(''); // Resetear assignedTo
+      setAssignedTo('');
+      setError('');
     }
-    setError(''); // Limpiar errores cuando la tarea o el estado de apertura cambian
-  }, [task, isOpen]); // Añadir isOpen a las dependencias para resetear si se cierra y reabre sin cambiar la tarea
+  }, [isOpen]);
 
   // Manejar clic fuera del modal para cerrarlo
   useEffect(() => {
@@ -80,7 +90,7 @@ const EditTaskModal = ({ task, isOpen, onClose, onSubmit }) => {
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen || !task) {
+  if (!isOpen || !task || !task.id) {
     return null;
   }
 
