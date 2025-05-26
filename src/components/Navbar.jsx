@@ -2,11 +2,29 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext'; // Importar hook de autenticación
+import { getUserDocument } from '../services/firestore'; // Importar para obtener githubUsername
 import logo from '../assets/logo.png'; // Importar el logo
 
 const Navbar = () => {
   const { currentUser, logout } = useAuth(); // Obtener usuario actual y función de logout
   const navigate = useNavigate();
+  const [githubUsername, setGithubUsername] = React.useState(null);
+
+  React.useEffect(() => {
+    const fetchUsername = async () => {
+      if (currentUser?.uid) {
+        const userDoc = await getUserDocument(currentUser.uid);
+        if (userDoc && userDoc.githubUsername) {
+          setGithubUsername(userDoc.githubUsername);
+        } else if (currentUser.displayName) {
+          setGithubUsername(currentUser.displayName);
+        } else {
+          setGithubUsername(null);
+        }
+      }
+    };
+    fetchUsername();
+  }, [currentUser]);
 
   const handleLogout = async () => {
     try {
@@ -44,11 +62,11 @@ const Navbar = () => {
                 <li className="nav-item dropdown">
                   <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     {currentUser.photoURL ? (
-                      <img src={currentUser.photoURL} alt={currentUser.displayName || 'Avatar'} style={{ width: '30px', height: '30px', borderRadius: '50%', marginRight: '8px' }} />
+                      <img src={currentUser.photoURL} alt={githubUsername || currentUser.displayName || 'Avatar'} style={{ width: '30px', height: '30px', borderRadius: '50%', marginRight: '8px' }} />
                     ) : (
                       <i className="bi bi-person-circle me-1"></i>
                     )}
-                    {currentUser.displayName || currentUser.email}
+                    {githubUsername || currentUser.displayName || currentUser.email}
                   </a>
                   <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
                     <li><Link className="dropdown-item" to="/profile">Perfil</Link></li>

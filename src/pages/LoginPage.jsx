@@ -84,7 +84,6 @@ const LoginPage = () => {
               <button 
                 onClick={handleLogin} 
                 className="btn btn-dark mx-auto mb-3 d-flex justify-content-center align-items-center" /* Estilos de Flexbox actualizados */
-                style={{ width: '150px' }} /* Ancho fijo mantenido */
                 disabled={loading}
               >
                 {loading ? (

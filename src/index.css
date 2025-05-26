@@ -420,7 +420,11 @@ a:hover {
 .nav-link:hover,
 .nav-link.active {
   color: var(--df-accent-primary) !important;
-  background-color: rgba(var(--df-accent-primary-rgb), 0.1);
+  background-color: transparent !important;
+  text-decoration: none !important;
+  box-shadow: 0 0 12px 2px var(--df-accent-primary), 0 0 24px 4px rgba(var(--df-accent-primary-rgb), 0.4);
+  filter: brightness(1.15);
+  transition: box-shadow 0.2s, color 0.2s, filter 0.2s;
 }
 
 .navbar-toggler {
@@ -1393,5 +1397,33 @@ input:-webkit-autofill:active {
 .fab-mobile i { /* Estilo para el icono dentro del FAB */
   font-size: 1.5rem; /* Tamaño del icono */
   line-height: 1; /* Para asegurar alineación vertical del icono */
+}
+
+/* Tarjetas de características principales en la landing page */
+.feature-simple-card {
+  background: var(--df-bg-secondary);
+  border: 1.5px solid var(--df-accent-primary) !important;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+  color: var(--df-text-primary);
+}
+
+/* Unifica el hover del botón Crear Nuevo Proyecto con el de los enlaces del navbar */
+.btn-outline-primary.btn-pulse-glow {
+  color: var(--df-accent-primary) !important;
+  background: transparent !important;
+  border-color: var(--df-accent-primary) !important;
+  box-shadow: 0 0 8px 1.5px var(--df-accent-primary), 0 0 18px 3px rgba(var(--df-accent-primary-rgb), 0.35);
+  transition: box-shadow 0.2s, color 0.2s, filter 0.2s, background 0.2s;
+}
+
+.btn-outline-primary.btn-pulse-glow:hover,
+.btn-outline-primary.btn-pulse-glow:focus {
+  color: var(--df-accent-primary) !important;
+  background: transparent !important;
+  border-color: var(--df-accent-primary) !important;
+  text-decoration: none !important;
+  box-shadow: 0 0 12px 2px var(--df-accent-primary), 0 0 24px 4px rgba(var(--df-accent-primary-rgb), 0.4);
+  filter: brightness(1.15);
 }
 

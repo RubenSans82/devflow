@@ -51,7 +51,7 @@ const HomePage = () => {
       {/* Sección de Proyectos de Ejemplo */}
       <section className="py-5" style={{ backgroundColor: 'transparent'}}>
         <div className="container">
-          <h2 className="text-center mb-5 pb-5 fw-bold" style={{ color: 'var(--df-text-primary)' }}>Proyectos Destacados</h2>
+          <h2 className="text-center mb-5 pb-5 fw-bold dashboard-title-tech-subtitle" style={{ color: 'var(--df-text-primary)' }}>Proyectos Destacados</h2>
           {loading && <p className="text-center" style={{ color: 'var(--df-text-secondary)' }}>Cargando proyectos...</p>}
           {error && <p className="text-center text-danger">{error}</p>}
           {!loading && !error && exampleProjects.length === 0 && (
@@ -72,11 +72,11 @@ const HomePage = () => {
       {/* Sección de Características */}
       <section className="features-section py-5" style={{ backgroundColor: 'transparent'}}>
         <div className="container">
-          <h2 className="text-center mb-5 fw-bold" style={{ color: 'var(--df-text-primary)' }}>Características Principales</h2>
+          <h2 className="text-center mb-5 fw-bold dashboard-title-tech-subtitle" style={{ color: 'var(--df-text-primary)' }}>Características Principales</h2>
           <div className="row justify-content-center">
             {/* Feature 1 */}
             <div className="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
-              <div className="feature-card text-center p-4 w-100">
+              <div className="card feature-simple-card d-flex flex-column justify-content-center align-items-center p-4 w-100" style={{background: 'var(--df-bg-secondary)', border: '1.5px solid var(--df-accent-primary)', borderRadius: '8px', boxShadow: '0 5px 15px rgba(0,0,0,0.12)'}}>
                 <div className="feature-icon mb-3">
                   <i className="bi bi-kanban"></i>
                 </div>
@@ -88,7 +88,7 @@ const HomePage = () => {
             </div>
             {/* Feature 2 */}
             <div className="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
-              <div className="feature-card text-center p-4 w-100">
+              <div className="card feature-simple-card d-flex flex-column justify-content-center align-items-center p-4 w-100" style={{background: 'var(--df-bg-secondary)', border: '1.5px solid var(--df-accent-primary)', borderRadius: '8px', boxShadow: '0 5px 15px rgba(0,0,0,0.12)'}}>
                 <div className="feature-icon mb-3">
                   <i className="bi bi-people-fill"></i>
                 </div>
@@ -100,7 +100,7 @@ const HomePage = () => {
             </div>
             {/* Feature 3 */}
             <div className="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
-              <div className="feature-card text-center p-4 w-100">
+              <div className="card feature-simple-card d-flex flex-column justify-content-center align-items-center p-4 w-100" style={{background: 'var(--df-bg-secondary)', border: '1.5px solid var(--df-accent-primary)', borderRadius: '8px', boxShadow: '0 5px 15px rgba(0,0,0,0.12)'}}>
                 <div className="feature-icon mb-3">
                   <i className="bi bi-palette-fill"></i>
                 </div>
