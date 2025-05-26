@@ -449,12 +449,55 @@ a:hover {
   transition: box-shadow 0.2s, color 0.2s, filter 0.2s;
 }
 
+/* Navbar toggler tech/futurista */
 .navbar-toggler {
-  border-color: rgba(var(--df-text-primary-rgb), 0.3);
+  border: 2px solid var(--df-accent-primary) !important;
+  border-radius: 8px;
+  background: rgba(var(--df-accent-primary-rgb), 0.08);
+  box-shadow: 0 0 12px 2px var(--df-accent-primary), 0 0 24px 4px rgba(var(--df-accent-primary-rgb), 0.25);
+  transition: box-shadow 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.navbar-toggler:focus, .navbar-toggler:hover {
+  background: rgba(var(--df-accent-primary-rgb), 0.18);
+  border-color: var(--df-accent-primary);
+  box-shadow: 0 0 18px 4px var(--df-accent-primary), 0 0 32px 8px rgba(var(--df-accent-primary-rgb), 0.35);
 }
 
 .navbar-toggler-icon {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28var(--df-text-primary-rgb%29, 0.7%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  background-image: none !important;
+  position: relative;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-toggler-icon::before, .navbar-toggler-icon::after, .navbar-toggler-icon span {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 0.35rem;
+  right: 0.35rem;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--df-primary-light), var(--df-accent-primary));
+  box-shadow: 0 0 8px var(--df-accent-primary);
+  transition: all 0.3s cubic-bezier(.4,2,.6,1);
+}
+
+.navbar-toggler-icon::before {
+  top: 0.45rem;
+}
+
+.navbar-toggler-icon::after {
+  bottom: 0.45rem;
+}
+
+.navbar-toggler-icon span {
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* Estilos para Footer */
@@ -670,14 +713,14 @@ input:-webkit-autofill:active {
 
 .hero-section .hero-title {
   animation-delay: 0.2s;
-  font-size: 4.5rem; /* Más grande y audaz */
+  font-size: clamp(2.6rem, 13vw, 4.5rem); /* Más grande en móvil */
   color: var(--df-text-primary);
-  text-transform: uppercase; /* Mayúsculas para un look más fuerte */
-  letter-spacing: 2px; /* Espaciado entre letras */
+  text-transform: uppercase;
+  letter-spacing: 2px;
   text-shadow: 
     0 0 10px var(--df-primary-glow),
     0 0 20px var(--df-primary-glow),
-    0 0 30px var(--df-primary-neon-glow), /* Efecto neón */
+    0 0 30px var(--df-primary-neon-glow),
     0 0 40px var(--df-primary-neon-glow);
 }
 
@@ -1477,10 +1520,69 @@ input:-webkit-autofill:active {
 
 /* Notificación campana: color secundario por defecto, azul neón en hover o abierto */
 .notification-bell-btn, .notification-bell-btn .bi-bell {
-  color: var(--df-text-secondary) !important;
-  transition: color 0.2s;
+  color: var(--df-text-primary) !important;
+  box-shadow: none;
+  transition: box-shadow 0.2s, color 0.2s;
 }
 .notification-bell-btn:hover, .notification-bell-btn:focus, .notification-bell-btn.open, .notification-bell-btn.open .bi-bell {
-  color: var(--df-accent-primary) !important;
+  color: var(--df-accent-primary, #00f0ff) !important;
+  box-shadow: 0 0 10px 2px var(--df-accent-primary, #00f0ff44);
+}
+
+/* Logo responsive en Login */
+.login-logo-responsive {
+  display: block;
+  max-width: 350px;
+  width: 100%;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 576px) {
+  .login-logo-responsive {
+    max-width: 220px;
+ 
+ 
+ 
+ 
+ 
+  }
+}
+
+/* Estilos para la campana de notificaciones flotante en móvil/tablet */
+@media (max-width: 991.98px) {
+  .notification-fab-bottom {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    width: 52px;
+    height: 52px;
+    background-color: var(--df-accent-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 169, 224, 0.19);
+    z-index: 1030;
+    color: white;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    text-decoration: none;
+    border: 2px solid var(--df-accent-primary);
+  }
+  .notification-fab-bottom:hover {
+    transform: scale(1.1);
+    background-color: var(--df-primary-darker);
+    color: white;
+    border-color: var(--df-primary-darker);
+  }
+  .notification-fab-bottom .notification-bell-btn {
+    font-size: 1.35rem;
+    background: none;
+    border: none;
+    box-shadow: none;
+    color: var(--df-text-primary);
+    padding: 0;
+  }
 }
 

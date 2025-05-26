@@ -150,10 +150,6 @@ const UserProfilePage = () => {
               <p className="text-center text-muted mb-4">{profileData.email}</p>
 
               <ul className="list-group list-group-flush mb-4">
-                <li className="list-group-item d-flex justify-content-between align-items-center">
-                  <strong>ID de Usuario:</strong>
-                  <span className="text-muted">{currentUser.uid}</span>
-                </li>
                 {profileData.metadata?.creationTime && (
                   <li className="list-group-item d-flex justify-content-between align-items-center">
                     <strong>Miembro desde:</strong>

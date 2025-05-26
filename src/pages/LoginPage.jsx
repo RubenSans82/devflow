@@ -76,7 +76,12 @@ const LoginPage = () => {
           <div className="card hero-section-content">
             <div className="card-body pt-2 px-4 pb-4 pt-md-3 px-md-5 pb-md-5"> {/* Ajustado padding superior */}
               <div className="text-center mb-4">
-                <img src="/src/assets/logo.png" alt="DevFlow Logo" style={{ maxWidth: '350px', marginBottom: '1rem' }} />
+                <img 
+                  src="/src/assets/logo.png" 
+                  alt="DevFlow Logo" 
+                  className="login-logo-responsive"
+                  style={{ maxWidth: '350px', width: '100%', height: 'auto', marginBottom: '1rem' }}
+                />
               </div>
               <h2 className="card-title text-center mb-4">Iniciar Sesión</h2>
               {error && <div className="alert alert-danger">{error}</div>}

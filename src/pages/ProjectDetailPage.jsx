@@ -412,11 +412,11 @@ const ProjectDetailPage = () => {
   return (
     <div className="container mt-5">
       {/* Título y Botones de Acción del Proyecto */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 gap-md-0">
         <h1 className="dashboard-title-tech">{project.title}</h1>
         {canManageProject && (
-          <div>
-            <Link to={`/project/edit/${projectId}`} className="btn btn-outline-primary me-2"> {/* Corregida la ruta */}
+          <div className="d-flex flex-row flex-md-row gap-2 mt-2 mt-md-0">
+            <Link to={`/project/edit/${projectId}`} className="btn btn-outline-primary me-2">
               <i className="bi bi-pencil-square me-1"></i> Editar Proyecto
             </Link>
             <button onClick={handleDelete} className="btn btn-outline-danger">
@@ -480,7 +480,7 @@ const ProjectDetailPage = () => {
                         />
                       </div>
                       <div className="col-md-auto">
-                        <button type="submit" className="btn btn-primary me-2"> {/* Cambiado de btn-success a btn-primary */}
+                        <button type="submit" className="btn btn-primary me-2">
                           <i className="bi bi-check-circle me-1"></i> Guardar
                         </button>
                         <button type="button" className="btn btn-secondary" onClick={() => { setShowAddCollaboratorForm(false); setCollaboratorEmail(''); setCollaboratorError(''); }}>
@@ -559,10 +559,10 @@ const ProjectDetailPage = () => {
                           ))}
                         </select>
                       </div>
-                      <button type="submit" className="btn btn-primary me-2"> {/* Cambiado de btn-success a btn-primary */}
+                      <button type="submit" className="btn btn-primary me-2 mb-2 mb-md-0"> {/* Cambiado de btn-success a btn-primary */}
                         <i className="bi bi-check-circle me-1"></i> Guardar Tarea
                       </button>
-                      <button type="button" className="btn btn-secondary" onClick={() => { setShowCreateTaskForm(false); setTaskError(''); }}>
+                      <button type="button" className="btn btn-secondary mb-2 mb-md-0" onClick={() => { setShowCreateTaskForm(false); setTaskError(''); }}>
                         <i className="bi bi-x-circle me-1"></i> Cancelar
                       </button>
                     </form>

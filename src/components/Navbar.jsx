@@ -38,18 +38,25 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark sticky-top py-2"> {/* Cambiado py-3 a py-2 para ajustar padding vertical */}
-      <div className="container-fluid">
+    <nav className="navbar navbar-expand-lg navbar-dark sticky-top py-2">
+      <div className="container-fluid position-relative">
         {/* Logo actualizado */}
         <div 
           className="navbar-brand fs-4 fw-bold d-flex align-items-center"
-          style={{ fontFamily: 'var(--font-family-headings)', color: 'var(--df-text-primary)', cursor: 'default' }} // Cambiado Link por div y añadido cursor: default
+          style={{ fontFamily: 'var(--font-family-headings)', color: 'var(--df-text-primary)', cursor: 'default' }}
         >
-          <img src={logo} alt="DevFlow Logo" style={{ height: '49px', marginRight: '10px' }} /> {/* Logo actualizado y texto eliminado */}
+          <img src={logo} alt="DevFlow Logo" style={{ height: '49px', marginRight: '10px' }} />
         </div>
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span className="navbar-toggler-icon"></span>
+        {/* Botón hamburguesa fijo en la esquina superior derecha */}
+        <button className="navbar-toggler position-absolute top-0 end-0 mt-2 me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span className="navbar-toggler-icon"><span></span></span>
         </button>
+        {/* Campana flotante en la parte inferior izquierda en móvil/tablet */}
+        {currentUser && (
+          <div className="notification-fab-bottom d-lg-none">
+            <NotificationCenter />
+          </div>
+        )}
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto align-items-center">
             {currentUser ? (
@@ -60,10 +67,18 @@ const Navbar = () => {
                 <li className="nav-item">
                   <Link className="nav-link" to="/projects">Proyectos</Link>
                 </li>
-                <li className="nav-item me-2">
+                {/* Notificaciones solo en escritorio dentro del navbar */}
+                <li className="nav-item d-none d-lg-block me-2">
                   <NotificationCenter />
                 </li>
-                <li className="nav-item dropdown">
+                {/* Enlaces directos a perfil y logout en móvil, menú con nombre solo en escritorio */}
+                <li className="nav-item d-lg-none">
+                  <Link className="nav-link" to="/profile">Perfil</Link>
+                </li>
+                <li className="nav-item d-lg-none">
+                  <button className="nav-link btn btn-link p-0" style={{color: 'inherit'}} onClick={handleLogout}>Logout</button>
+                </li>
+                <li className="nav-item dropdown d-none d-lg-block">
                   <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     {currentUser.photoURL ? (
                       <img src={currentUser.photoURL} alt={githubUsername || currentUser.displayName || 'Avatar'} style={{ width: '30px', height: '30px', borderRadius: '50%', marginRight: '8px' }} />
