@@ -373,6 +373,99 @@ export const rejectCollaborationRequest = async (notif) => {
   await updateDoc(notifRef, { status: 'rejected', read: true });
 };
 
+// --- Funciones para Búsqueda ---
+
+// Buscar proyectos por término de búsqueda en el título
+export const searchProjects = async (searchTerm) => {
+  if (!searchTerm || searchTerm.trim() === '') {
+    return [];
+  }
+  const projectsRef = collection(db, PROJECTS_COLLECTION);
+  // Firestore no soporta "contains" o "like" de forma nativa para strings de forma eficiente y escalable.
+  // Esta es una aproximación que busca coincidencias exactas o por prefijo.
+  // Para una búsqueda más robusta, se necesitaría una solución más avanzada (ej. Algolia, Typesense, o indexación manual de keywords).
+  
+  // Intenta buscar por coincidencia de prefijo (si el campo está en mayúsculas/minúsculas consistentes o se normaliza)
+  // Firestore requiere que el campo de la desigualdad sea el primero en orderBy.
+  // Y las desigualdades (como >= y <= para rangos de strings) están limitadas.
+  
+  // Solución simple: obtener todos los proyectos y filtrar en el cliente (NO RECOMENDADO para muchos datos)
+  // const querySnapshot = await getDocs(projectsRef);
+  // const allProjects = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  // const lowerSearchTerm = searchTerm.toLowerCase();
+  // return allProjects.filter(project => 
+  //   project.title && project.title.toLowerCase().includes(lowerSearchTerm)
+  // );
+
+  // Solución más orientada a Firestore (pero limitada):
+  // Se asume que se busca el inicio del título.
+  // Para que sea insensible a mayúsculas/minúsculas, necesitarías un campo adicional normalizado (ej. title_lowercase)
+  const searchTermLower = searchTerm.toLowerCase(); // Normalizar término de búsqueda
+
+  const q = query(
+    projectsRef,
+    // where("title_lowercase", ">=", searchTermLower), // Necesitarías un campo title_lowercase
+    // where("title_lowercase", "<=", searchTermLower + '\\uf8ff') // \\uf8ff es un carácter unicode alto para rangos
+    // Por ahora, filtramos en cliente después de obtener todos, ya que no tenemos title_lowercase
+    // Esto NO es eficiente para grandes datasets.
+  );
+
+  try {
+    const querySnapshot = await getDocs(q);
+    const projects = querySnapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(project => 
+        project.title && project.title.toLowerCase().includes(searchTermLower)
+      );
+    return projects;
+  } catch (error) {
+    console.error("Error searching projects:", error);
+    throw error;
+  }
+};
+
+// Buscar tareas por término de búsqueda en el título o descripción
+export const searchTasks = async (searchTerm) => {
+  if (!searchTerm || searchTerm.trim() === '') {
+    return [];
+  }
+  const tasksRef = collection(db, TASKS_COLLECTION);
+  const searchTermLower = searchTerm.toLowerCase();
+
+  // Similar a proyectos, filtramos en cliente. No eficiente para grandes datasets.
+  // Considera un campo normalizado para búsquedas o un servicio externo.
+  try {
+    const querySnapshot = await getDocs(tasksRef);
+    const tasks = querySnapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(task => 
+        (task.title && task.title.toLowerCase().includes(searchTermLower)) ||
+        (task.description && task.description.toLowerCase().includes(searchTermLower))
+      );
+    
+    // Si quieres añadir el título del proyecto a cada tarea encontrada:
+    // Esto añade N lecturas adicionales, donde N es el número de tareas encontradas.
+    // Considera desnormalizar el projectTitle en el documento de la tarea si es necesario frecuentemente.
+    const tasksWithProjectTitles = await Promise.all(tasks.map(async (task) => {
+      if (task.projectId) {
+        try {
+          const project = await getProjectById(task.projectId);
+          return { ...task, projectTitle: project.title };
+        } catch (projectError) {
+          console.warn(`Could not fetch project title for task ${task.id}:`, projectError);
+          return { ...task, projectTitle: 'Proyecto no encontrado' };
+        }
+      }
+      return task;
+    }));
+    
+    return tasksWithProjectTitles;
+  } catch (error) {
+    console.error("Error searching tasks:", error);
+    throw error;
+  }
+};
+
 // --- Notificaciones genéricas ---
 /**
  * Crea una notificación genérica para un usuario

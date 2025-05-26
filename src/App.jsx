@@ -12,6 +12,7 @@ import ProjectDetailPage from './pages/ProjectDetailPage';
 import UserProfilePage from './pages/UserProfilePage';
 import CreateProjectPage from './pages/CreateProjectPage';
 import EditProjectPage from './pages/EditProjectPage';
+import SearchResultsPage from './pages/SearchResultsPage'; // ADDED: Import SearchResultsPage
 import './App.css';
 
 // Componente para proteger rutas
@@ -42,6 +43,7 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/projects" element={<ProjectsListPage />} />
                 <Route path="/project/:projectId" element={<ProjectDetailPage />} />
+                <Route path="/search" element={<SearchResultsPage />} /> {/* ADDED: Route for search results */}
                 
                 <Route 
                   path="/dashboard" 

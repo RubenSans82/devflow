@@ -1559,6 +1559,14 @@ input:-webkit-autofill:active {
  
  
  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
   }
 }
 
@@ -1657,5 +1665,151 @@ input:-webkit-autofill:active {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   border-bottom: 2px solid var(--df-accent-primary) !important;
+}
+
+/* Estilos para el formulario de búsqueda global en el Navbar */
+.global-search-form {
+  min-width: 250px; /* Ancho mínimo para el campo de búsqueda */
+}
+
+.global-search-input {
+  background-color: rgba(var(--df-bg-secondary-rgb), 0.7); /* Fondo ligeramente translúcido */
+  color: var(--df-text-primary);
+  border: 1px solid var(--df-text-secondary);
+  border-radius: var(--bs-border-radius-pill); /* Bordes redondeados tipo píldora */
+  padding-left: 1rem;
+  padding-right: 1rem;
+  font-size: 0.85rem; /* Tamaño de fuente ligeramente reducido */
+  transition: all 0.3s ease-in-out;
+}
+
+.global-search-input:focus {
+  background-color: var(--df-bg-secondary);
+  border-color: var(--df-accent-primary);
+  box-shadow: 0 0 0 0.2rem rgba(var(--df-accent-primary-rgb), 0.25), 0 0 10px rgba(var(--df-accent-primary-rgb), 0.3);
+  min-width: 300px; /* Expandir ligeramente al enfocar */
+}
+
+.global-search-input::placeholder {
+  color: var(--df-text-secondary);
+  opacity: 0.8;
+}
+
+/* Ajuste para el Navbar Toggler y el formulario de búsqueda en móvil */
+@media (max-width: 991.98px) {
+  .global-search-form {
+    width: 100%; /* Ocupar todo el ancho disponible en móvil */
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .global-search-input:focus {
+    min-width: unset; /* Evitar expansión excesiva en móvil */
+  }
+  .navbar-nav {
+    align-items: stretch !important; /* Para que el form ocupe el ancho */
+  }
+}
+
+/* Estilos para la página de resultados de búsqueda */
+.search-results-container {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+}
+
+.dashboard-title-tech,
+.dashboard-title-tech-subtitle {
+  /* Ya existen estilos base, pero reforzamos para la página de búsqueda */
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+
+/* Resultados de proyectos */
+.search-projects-section .dashboard-title-tech-subtitle {
+  color: var(--df-accent-primary);
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.search-projects-section .project-card {
+  /* Hereda el estilo tech, pero con un leve resplandor extra */
+  box-shadow: 0 0 0 2px var(--df-accent-primary), 0 0 18px 2px rgba(var(--df-accent-primary-rgb), 0.25);
+  border-radius: 12px;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.search-projects-section .project-card:hover {
+  box-shadow: 0 0 0 3px var(--df-accent-primary), 0 0 32px 6px rgba(var(--df-accent-primary-rgb), 0.35);
+  transform: translateY(-4px) scale(1.02);
+}
+
+/* Resultados de tareas */
+.search-tasks-section .dashboard-title-tech-subtitle {
+  color: var(--df-accent-secondary);
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+}
+
+/* Estilos unificados para resultados de búsqueda (proyectos y tareas) */
+.search-results-section {
+  margin-bottom: 2.5rem;
+}
+
+.search-results-section .search-card {
+  background: linear-gradient(120deg, rgba(var(--df-bg-secondary-rgb,44,48,58),0.98) 80%, rgba(var(--df-accent-primary-rgb),0.08) 100%);
+  border: 1.5px solid var(--df-accent-primary);
+  color: var(--df-text-primary);
+  border-radius: 14px;
+  margin-bottom: 1.1rem;
+  box-shadow: 0 2px 16px 0 rgba(var(--df-accent-primary-rgb), 0.13), 0 0 0 2px var(--df-accent-primary) inset;
+  transition: box-shadow 0.2s, border-color 0.2s, transform 0.18s;
+  position: relative;
+  overflow: hidden;
+  padding: 1.2rem 1.3rem 1.1rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;
+}
+
+.search-results-section .search-card:hover {
+  border-color: var(--df-accent-secondary);
+  box-shadow: 0 4px 24px 4px rgba(var(--df-accent-secondary-rgb), 0.18), 0 0 0 2.5px var(--df-accent-secondary) inset;
+  transform: translateY(-2px) scale(1.012);
+}
+
+.search-results-section .search-card-title {
+  color: var(--df-accent-primary);
+  font-size: 1.13rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  letter-spacing: 0.5px;
+}
+
+.search-results-section .search-card-meta {
+  color: var(--df-accent-secondary);
+  font-size: 0.97rem;
+  margin-bottom: 0.2rem;
+}
+
+.search-results-section .search-card-desc {
+  color: var(--df-text-secondary);
+  font-size: 0.98rem;
+  margin-bottom: 0.2rem;
+}
+
+.search-results-section .search-card-badge {
+  font-size: 0.92em;
+  border-radius: 6px;
+  box-shadow: 0 0 8px 1px rgba(var(--df-accent-secondary-rgb),0.13);
+  margin-right: 0.4em;
+  background: var(--df-accent-secondary);
+  color: #fff;
+  padding: 0.2em 0.7em;
+  display: inline-block;
+}
+
+@media (max-width: 767.98px) {
+  .search-results-section .search-card {
+    padding: 1rem 0.7rem;
+  }
 }
 

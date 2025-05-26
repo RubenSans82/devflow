@@ -5,11 +5,13 @@ import { useAuth } from '../contexts/AuthContext'; // Importar hook de autentica
 import { getUserDocument } from '../services/firestore'; // Importar para obtener githubUsername
 import logo from '../assets/logo.png'; // Importar el logo
 import NotificationCenter from './NotificationCenter';
+import { useState } from 'react'; // ADDED: Import useState
 
 const Navbar = () => {
-  const { currentUser, logout } = useAuth(); // Obtener usuario actual y función de logout
+  const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const [githubUsername, setGithubUsername] = React.useState(null);
+  const [searchTerm, setSearchTerm] = useState(''); // ADDED: State for search term
 
   React.useEffect(() => {
     const fetchUsername = async () => {
@@ -37,6 +39,21 @@ const Navbar = () => {
     }
   };
 
+  const handleSearchChange = (event) => { // ADDED: Handler for search input change
+    setSearchTerm(event.target.value);
+  };
+
+  const handleSearchSubmit = (event) => { // ADDED: Handler for search submit
+    event.preventDefault();
+    if (searchTerm.trim()) {
+      // Navigate to a search results page or handle search inline
+      // For now, let's log it and navigate to a placeholder route
+      console.log('Search term:', searchTerm);
+      navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+      setSearchTerm(''); // Clear search term after submit
+    }
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark sticky-top py-2">
       <div className="container-fluid position-relative">
@@ -59,6 +76,21 @@ const Navbar = () => {
         )}
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto align-items-center">
+            {currentUser && ( /* ADDED: Search form for logged in users */
+              <li className="nav-item me-lg-2">
+                <form className="d-flex global-search-form" role="search" onSubmit={handleSearchSubmit}>
+                  <input 
+                    className="form-control form-control-sm global-search-input" 
+                    type="search" 
+                    placeholder="Buscar proyectos, tareas..." 
+                    aria-label="Buscar"
+                    value={searchTerm}
+                    onChange={handleSearchChange} 
+                  />
+                  {/* <button className="btn btn-outline-primary btn-sm" type="submit"><i className="bi bi-search"></i></button> */}
+                </form>
+              </li>
+            )}
             {currentUser ? (
               <>
                 <li className="nav-item">
