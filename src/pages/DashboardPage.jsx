@@ -120,10 +120,45 @@ const DashboardPage = () => {
         console.log('Abrir modal para añadir colaborador al proyecto:', projectId);
         break;
       case 'delete_project':
-        // Aquí se manejaría la lógica para eliminar el proyecto
-        // Podría ser mostrar un modal de confirmación primero
-        console.log('Iniciar flujo para eliminar proyecto:', projectId);
-        // Ejemplo: setSelectedProjectForDeletion(projectId); openConfirmationModal(true);
+        setConfirmationModalConfig({
+          title: 'Confirmar Eliminación de Proyecto',
+          message: '¿Estás seguro de que quieres eliminar este proyecto? Esta acción no se puede deshacer y eliminará todas las tareas asociadas.',
+          onConfirm: async () => {
+            try {
+              await import('../services/firestore').then(m => m.deleteProject(projectId));
+              setShowConfirmationModal(false);
+              setConfirmationModalConfig({
+                title: 'Éxito',
+                message: 'Proyecto eliminado con éxito.',
+                onConfirm: () => {
+                  setShowConfirmationModal(false);
+                  // Recargar proyectos tras eliminar
+                  setUserProjects(prev => prev.filter(p => p.id !== projectId));
+                },
+                confirmText: 'OK',
+                showCancelButton: false,
+                confirmButtonClass: 'btn-success',
+              });
+              setShowConfirmationModal(true);
+            } catch (err) {
+              setShowConfirmationModal(false);
+              setConfirmationModalConfig({
+                title: 'Error',
+                message: `Error al eliminar el proyecto: ${err.message || 'Error desconocido'}`,
+                onConfirm: () => setShowConfirmationModal(false),
+                confirmText: 'Cerrar',
+                showCancelButton: false,
+                confirmButtonClass: 'btn-danger',
+              });
+              setShowConfirmationModal(true);
+            }
+          },
+          confirmText: 'Eliminar Proyecto',
+          cancelText: 'Cancelar',
+          showCancelButton: true,
+          confirmButtonClass: 'btn-danger',
+        });
+        setShowConfirmationModal(true);
         break;
       default:
         console.warn(`Acción desconocida: ${action}`);

@@ -116,13 +116,13 @@ const CreateProjectPage = () => {
         </div>
       </div>
       <ConfirmationModal
-        show={showSuccessModal}
-        onHide={() => setShowSuccessModal(false)} // Permite cerrar con la 'x' o clic fuera
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)} // Permite cerrar con la 'x' o clic fuera
         title="Éxito"
-        body={successModalMessage}
+        message={successModalMessage}
         onConfirm={handleSuccessModalConfirm}
         confirmText="OK"
-        cancelText={null} // Oculta el botón de cancelar
+        showCancelButton={false} // Oculta el botón de cancelar correctamente
       />
       {/* El enlace se movió arriba, dentro de la columna del formulario */}
     </div>

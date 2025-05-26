@@ -270,13 +270,15 @@ const ProjectDetailPage = () => {
   };
 
   const handleDeleteTask = async (taskId) => {
+    console.log('[ProjectDetailPage] handleDeleteTask llamado con taskId:', taskId);
     setConfirmationModalConfig({
       title: "Confirmar Eliminación de Tarea",
       message: "¿Estás seguro de que quieres eliminar esta tarea?",
       onConfirm: async () => {
         try {
-          await deleteTask(taskId);
-          setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+          console.log('[ProjectDetailPage] Confirmación de borrado, eliminando tarea:', taskId);
+          await deleteTask(taskId); // Elimina la tarea de la base de datos
+          await fetchProjectAndTasks(); // Vuelve a cargar los datos del proyecto y las tareas
           setShowConfirmationModal(false); // Cerrar modal de confirmación
           
           setConfirmationModalConfig({ // Preparar modal de éxito
@@ -576,11 +578,12 @@ const ProjectDetailPage = () => {
                     <TaskItem 
                       key={task.id} 
                       task={task} 
-                      onStatusChange={handleTaskStatusChange} 
-                      onEdit={canManageTasks ? () => handleEditTask(task) : undefined} 
-                      onDelete={canManageTasks ? () => handleDeleteTask(task.id) : undefined} 
-                      users={users} 
-                      canManage={canManageTasks} 
+                      projectOwnerId={project?.ownerId}
+                      onStatusChange={handleTaskStatusChange}
+                      onEdit={canManageTasks ? handleEditTask : undefined} // Pasar función directa
+                      onDelete={canManageTasks ? handleDeleteTask : undefined} // Pasar función directa
+                      users={users}
+                      canManage={canManageTasks}
                     />
                   ))}
                 </ul>
@@ -594,25 +597,25 @@ const ProjectDetailPage = () => {
 
       {editingTask && showEditTaskModal && (
         <EditTaskModal 
-          show={showEditTaskModal} 
-          onHide={handleCloseEditModal} 
+          isOpen={showEditTaskModal} // CAMBIADO: de show a isOpen
+          onClose={handleCloseEditModal} // CAMBIADO: de onHide a onClose
           task={editingTask} 
-          onSave={handleUpdateTask} 
+          onSubmit={handleUpdateTask} // CAMBIADO: de onSave a onSubmit
           users={users} // Pasar la lista de usuarios al modal de edición
         />
       )}
 
       <ConfirmationModal
-        show={showConfirmationModal}
-        onHide={() => {
+        isOpen={showConfirmationModal}
+        onClose={() => {
           setShowConfirmationModal(false);
           // Si el modal era para una acción que redirige (ej. eliminar proyecto y luego OK),
           // y el usuario cierra con X, la redirección no ocurrirá.
           // Esto es generalmente aceptable, pero se podría manejar si es necesario.
         }}
-        title={confirmationModalConfig.title}
-        body={confirmationModalConfig.message}
         onConfirm={confirmationModalConfig.onConfirm}
+        title={confirmationModalConfig.title}
+        message={confirmationModalConfig.message}
         confirmText={confirmationModalConfig.confirmText}
         cancelText={confirmationModalConfig.cancelText}
         showCancelButton={confirmationModalConfig.showCancelButton}

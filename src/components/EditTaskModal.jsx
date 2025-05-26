@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react'; // Import useRef
 import PropTypes from 'prop-types';
 import { getAllUsers } from '../services/firestore'; // Importar getAllUsers
 
@@ -11,6 +11,7 @@ const EditTaskModal = ({ task, isOpen, onClose, onSubmit }) => {
   const [assignedTo, setAssignedTo] = useState(''); // Nuevo estado para assignedTo
   const [users, setUsers] = useState([]); // Nuevo estado para la lista de usuarios
   const [error, setError] = useState(''); // Estado para el mensaje de error
+  const modalRef = useRef(); // Ref para el contenido del modal
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -60,6 +61,25 @@ const EditTaskModal = ({ task, isOpen, onClose, onSubmit }) => {
     setError(''); // Limpiar errores cuando la tarea o el estado de apertura cambian
   }, [task, isOpen]); // Añadir isOpen a las dependencias para resetear si se cierra y reabre sin cambiar la tarea
 
+  // Manejar clic fuera del modal para cerrarlo
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen || !task) {
     return null;
   }
@@ -87,16 +107,25 @@ const EditTaskModal = ({ task, isOpen, onClose, onSubmit }) => {
   };
 
   return (
-    <div className="modal fade show" tabIndex="-1" style={{ display: 'block' }} aria-labelledby="editTaskModalLabel" aria-hidden={!isOpen}>
-      <div className="modal-dialog modal-dialog-centered modal-lg"> {/* modal-lg para más espacio */}
-        <div className="modal-content">
+    <div 
+      className="modal fade show" 
+      tabIndex="-1" 
+      style={{ 
+        display: 'block', 
+        backgroundColor: 'rgba(0, 0, 0, 0.5)' // Fondo oscurecido
+      }} 
+      aria-labelledby="editTaskModalLabel" 
+      aria-hidden={!isOpen}
+    >
+      <div className="modal-dialog modal-dialog-centered modal-lg">
+        <div className="modal-content" ref={modalRef} style={{ borderColor: 'rgba(255, 255, 255, 0.2)', borderWidth: '2px', borderStyle: 'solid' }}> {/* Aplicar borde y ref */}
           <div className="modal-header">
             <h5 className="modal-title" id="editTaskModalLabel">Editar Tarea: {task.title}</h5>
             <button type="button" className="btn-close" onClick={onClose} aria-label="Close"></button>
           </div>
           <form onSubmit={handleSubmit}>
             <div className="modal-body">
-              {error && <div className="alert alert-danger" role="alert">{error}</div>} {/* Mostrar error aquí */}
+              {error && <div className="alert alert-danger" role="alert">{error}</div>}
               <div className="mb-3">
                 <label htmlFor="editTaskTitle" className="form-label">Título <span className="text-danger">*</span></label>
                 <input
@@ -120,7 +149,7 @@ const EditTaskModal = ({ task, isOpen, onClose, onSubmit }) => {
               </div>
 
               <div className="row">
-                <div className="col-md-6 mb-3">
+                <div className="col-md-4 mb-3"> {/* Ajustado a col-md-4 */}
                   <label htmlFor="editTaskStatus" className="form-label">Estado</label>
                   <select 
                     id="editTaskStatus" 
@@ -133,7 +162,7 @@ const EditTaskModal = ({ task, isOpen, onClose, onSubmit }) => {
                     <option value="completada">Completada</option>
                   </select>
                 </div>
-                <div className="col-md-6 mb-3">
+                <div className="col-md-4 mb-3"> {/* Ajustado a col-md-4 */}
                   <label htmlFor="editTaskPriority" className="form-label">Prioridad</label>
                   <select 
                     id="editTaskPriority" 
@@ -146,17 +175,16 @@ const EditTaskModal = ({ task, isOpen, onClose, onSubmit }) => {
                     <option value="alta">Alta</option>
                   </select>
                 </div>
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="editTaskDueDate" className="form-label">Fecha de Vencimiento</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  id="editTaskDueDate"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                />
+                <div className="col-md-4 mb-3"> {/* Nuevo div para Fecha de Vencimiento */}
+                  <label htmlFor="editTaskDueDate" className="form-label">Fecha de Vencimiento</label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    id="editTaskDueDate"
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                  />
+                </div>
               </div>
               
               {/* Campo para asignar tarea (assignedTo) */}

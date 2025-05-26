@@ -139,13 +139,9 @@ export const removeCollaboratorFromProject = async (projectId, userIdToRemove) =
 // Eliminar un proyecto
 export const deleteProject = async (projectId) => {
   try {
-    // Eliminar el proyecto
-    await deleteDoc(doc(db, PROJECTS_COLLECTION, projectId));
-
-    // Eliminar tareas asociadas
+    // 1. Eliminar tareas asociadas primero
     const tasksQuery = query(collection(db, TASKS_COLLECTION), where("projectId", "==", projectId));
     const tasksSnapshot = await getDocs(tasksQuery);
-    
     if (!tasksSnapshot.empty) {
       const batch = writeBatch(db);
       tasksSnapshot.forEach(taskDoc => {
@@ -156,7 +152,8 @@ export const deleteProject = async (projectId) => {
     } else {
       console.log(`No se encontraron tareas para el proyecto ${projectId}.`);
     }
-
+    // 2. Eliminar el proyecto después
+    await deleteDoc(doc(db, PROJECTS_COLLECTION, projectId));
   } catch (error) {
     console.error("Error al eliminar proyecto y sus tareas: ", error);
     throw error;
@@ -228,9 +225,15 @@ export const updateTask = async (taskId, updatedData) => {
 };
 
 // Eliminar una tarea
-export const deleteTask = async (taskId) => { // Solo se necesita taskId
-  const taskRef = doc(db, TASKS_COLLECTION, taskId); // Usar TASKS_COLLECTION y solo taskId
-  await deleteDoc(taskRef);
+export const deleteTask = async (taskId) => {
+  const taskRef = doc(db, TASKS_COLLECTION, taskId);
+  try {
+    await deleteDoc(taskRef);
+    console.log(`Tarea ${taskId} eliminada correctamente.`);
+  } catch (error) {
+    console.error(`Error al eliminar la tarea ${taskId}:`, error);
+    throw error; // Re-lanzar el error para que pueda ser capturado por la función que llama
+  }
 };
 
 // --- Funciones para Usuarios (añadido getUserDocument) ---

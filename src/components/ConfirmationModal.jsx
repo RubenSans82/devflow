@@ -20,7 +20,7 @@ const ConfirmationModal = ({
   return (
     <div className="modal fade show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} aria-labelledby="confirmationModalLabel" aria-hidden={!isOpen}>
       <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content">
+        <div className="modal-content" style={{ border: '2px solid rgba(255,255,255,0.2)' }}>
           <div className="modal-header">
             <h5 className="modal-title" id="confirmationModalLabel">{title}</h5>
             <button type="button" className="btn-close" onClick={onClose} aria-label="Close"></button>

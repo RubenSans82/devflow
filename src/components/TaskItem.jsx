@@ -101,18 +101,21 @@ const TaskItem = ({ task, projectOwnerId, onEdit, onDelete, onStatusChange }) =>
                 <option value="completada">Completada</option>
               </select>
             )}
-            {onEdit && (
+            {canModify && onEdit && (
               <button 
-                onClick={() => onEdit(task)} 
-                className="btn btn-sm btn-outline-secondary me-1"
-                title="Editar Tarea"
+                className="btn btn-outline-primary btn-sm me-2" 
+                onClick={onEdit} // CAMBIADO: de () => onEdit(task) a solo onEdit
+                aria-label="Editar tarea"
               >
-                <i className="bi bi-pencil-square"></i>
+                <i className="bi bi-pencil-square"></i> Editar
               </button>
             )}
-            {onDelete && (
+            {canModify && onDelete && (
               <button 
-                onClick={() => onDelete(task.id)} 
+                onClick={() => {
+                  console.log('[TaskItem] Botón eliminar pulsado para tarea:', task.id);
+                  onDelete(task.id);
+                }} 
                 className="btn btn-sm btn-outline-danger"
                 title="Eliminar Tarea"
               >
