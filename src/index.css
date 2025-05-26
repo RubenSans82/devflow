@@ -9,6 +9,7 @@
   --df-bg-primary: #1A1D24;
   --df-bg-primary-rgb: 26, 29, 36; /* RGB para #1A1D24 */
   --df-bg-secondary: #2C303A;
+  --df-bg-tertiary: #383E4A; /* NUEVO: Gris azulado más claro que el secundario */
   --df-text-primary: #EAEAEA;
   --df-text-secondary: #A0A0B0;
   --df-accent-primary: #00A9E0;
@@ -131,6 +132,8 @@ a:hover {
 
 .card .card-title {
   color: var(--df-text-primary);
+  margin-top: -0.5rem; /* Reduce el espacio por encima del título (contra el padding del card-body) */
+  margin-bottom: 1.25rem; /* Aumenta el espacio por debajo del título */
 }
 
 .card .card-subtitle,
@@ -171,6 +174,27 @@ a:hover {
 .form-control::placeholder {
   color: var(--df-text-secondary);
   opacity: 0.7;
+}
+
+.form-select {
+  background-color: var(--df-bg-secondary); /* ACTUALIZADO */
+  color: var(--df-text-primary);
+  border: 1px solid var(--df-text-secondary);
+  /* Para asegurar que la flecha del desplegable sea visible en el tema oscuro */
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23a0a0b0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+.form-select:focus {
+  background-color: var(--df-bg-secondary); /* ACTUALIZADO */
+  color: var(--df-text-primary);
+  border-color: var(--df-accent-primary);
+  box-shadow: 0 0 0 0.25rem rgba(var(--df-accent-primary-rgb), 0.25);
+}
+
+/* Estilo para las opciones dentro del desplegable, aunque esto es más difícil de controlar de forma consistente entre navegadores */
+.form-select option {
+  background-color: var(--df-bg-secondary); /* ACTUALIZADO */
+  color: var(--df-text-primary);
 }
 
 .form-check-input {
@@ -299,6 +323,29 @@ a:hover {
 
 .modal-footer {
   border-top-color: var(--df-text-secondary);
+}
+
+.list-group-item {
+  background-color: var(--df-bg-tertiary); /* ACTUALIZADO */
+  color: var(--df-text-primary);
+  border-color: rgba(255, 255, 255, 0.15); 
+}
+
+/* Estilo para cuando un elemento de la lista está activo (si se usa esa clase) */
+.list-group-item.active {
+  background-color: var(--df-accent-primary);
+  border-color: var(--df-accent-primary);
+  color: #ffffff; 
+}
+
+/* Efecto hover para elementos no activos */
+.list-group-item:not(.active):hover {
+  background-color: rgba(var(--df-accent-primary-rgb), 0.1);
+}
+
+.create-task-form-card {
+  background-color: var(--df-bg-tertiary) !important; /* ACTUALIZADO */
+  border-color: rgba(255, 255, 255, 0.15) !important; 
 }
 
 .table {
@@ -1087,7 +1134,7 @@ input:-webkit-autofill:active {
   border: none !important;
   padding: 0 !important;
   /* SVG con stroke-width aumentado a 2.5 */
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 70 80.83' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='35,0 70,20.2075 70,60.6225 35,80.83 0,60.6225 0,20.2075' fill='transparent' stroke='%2300A9E0' stroke-width='2.5'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox=\'0 0 70 80.83\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpolygon points=\'35,0 70,20.2075 70,60.6225 35,80.83 0,60.6225 0,20.2075\' fill=\'transparent\' stroke=\'%2300A9E0\' stroke-width=\'2.5\'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center;
@@ -1127,7 +1174,7 @@ input:-webkit-autofill:active {
   border: none !important;
   padding: 0 !important;
   /* SVG con stroke-width aumentado a 2.5 */
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 70 80.83' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='35,0 70,20.2075 70,60.6225 35,80.83 0,60.6225 0,20.2075' fill='transparent' stroke='%23dc3545' stroke-width='2.5'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox=\'0 0 70 80.83\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpolygon points=\'35,0 70,20.2075 70,60.6225 35,80.83 0,60.6225 0,20.2075\' fill=\'transparent\' stroke=\'%23dc3545\' stroke-width=\'2.5\'/%3E%3C/svg%3E");
   filter: 
     drop-shadow(0 0 4px var(--df-error))
     drop-shadow(0 0 8px rgba(var(--df-error-rgb), 0.8));
@@ -1185,10 +1232,6 @@ input:-webkit-autofill:active {
 
 /* ... existing radial menu styles ... */
 
-.radial-menu-item {
-  /* position: relative; <-- This was the conflicting line, ensure it's removed or overridden if present elsewhere by mistake */
-}
-
 .radial-menu-action-label {
   visibility: hidden;
   opacity: 0;
@@ -1201,7 +1244,7 @@ input:-webkit-autofill:active {
   border-radius: 4px;
   white-space: nowrap;
   z-index: 10;
-  transition: opacity 0.3s ease, visibility 0s linear 0s, transform 0s ease;
+  transition: opacity 0.3s ease, visibility 0s linear 0.6s; /* Ajustado de 0.3s a 0.6s */
   box-shadow: 0 0 8px rgba(var(--df-primary-light-rgb), 0.5);
   border: 1px solid var(--df-primary-light);
   /* Default transform, will be overridden per item */
@@ -1232,7 +1275,7 @@ input:-webkit-autofill:active {
   border-radius: 4px;
   white-space: nowrap;
   z-index: 10;
-  transition: opacity 0.3s ease, visibility 0s linear 0s, transform 0s ease;
+  transition: opacity 0.3s ease, visibility 0s linear 0.6s, transform 0s ease;
   box-shadow: 0 0 8px rgba(var(--df-error-rgb), 0.5);
   border: 1px solid var(--df-error-rgb);
   /* Default transform, will be overridden per item */
@@ -1318,6 +1361,8 @@ input:-webkit-autofill:active {
     0 0 12px var(--df-primary-neon-glow); /* Sombra reducida */
   /* Si se desea mantener mayúsculas como el título principal, añadir: */
   text-transform: uppercase;
+  margin-top: 0.25rem; /* Reducido para acercar al borde superior del card-body */
+  margin-bottom: 1rem; /* Espacio consistente antes del contenido */
 }
 
 /* Estilos para el Botón de Acción Flotante (FAB) */

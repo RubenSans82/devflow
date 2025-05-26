@@ -495,23 +495,29 @@ const ProjectDetailPage = () => {
                   </form>
                 )}
 
-                {project.collaborators && project.collaborators.length > 0 ? (
-                  <ul className="list-group">
-                    {project.collaborators.map((collabId, index) => (
-                      <li key={collabId} className="list-group-item d-flex justify-content-between align-items-center">
-                        {project.collaboratorNames && project.collaboratorNames[index] ? project.collaboratorNames[index] : collabId}
-                        <button 
-                          className="btn btn-sm btn-outline-danger" 
-                          onClick={() => handleRemoveCollaborator(collabId)}
-                        >
-                          <i className="bi bi-person-dash-fill"></i>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>No hay colaboradores en este proyecto.</p>
-                )}
+                {(() => {
+                  const validCollaborators = project.collaborators && project.collaborators.filter(id => id && typeof id === 'string' && id.trim() !== '');
+                  if (validCollaborators && validCollaborators.length > 0) {
+                    return (
+                      <ul className="list-group">
+                        {validCollaborators.map((collabId, index) => (
+                          <li key={collabId || index} className="list-group-item d-flex justify-content-between align-items-center">
+                            {/* Intenta obtener el nombre del colaborador. Si no está en collaboratorNames, muestra el ID. */}
+                            {(project.collaboratorNames && project.collaboratorNames[project.collaborators.indexOf(collabId)]) || collabId}
+                            <button 
+                              className="btn btn-sm btn-outline-danger" 
+                              onClick={() => handleRemoveCollaborator(collabId)}
+                            >
+                              <i className="bi bi-person-dash-fill"></i>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    );
+                  } else {
+                    return <p>No hay colaboradores en este proyecto.</p>;
+                  }
+                })()}
               </div>
             </div>
           </div>
@@ -532,7 +538,7 @@ const ProjectDetailPage = () => {
               {taskError && <div className="alert alert-danger">{taskError}</div>}
 
               {showCreateTaskForm && (
-                <div className="card mb-3">
+                <div className="card mb-3 create-task-form-card"> {/* Añadida la clase create-task-form-card */}
                   <div className="card-body">
                     <h6 className="card-title">Nueva Tarea</h6>
                     <form onSubmit={handleCreateTask}>
