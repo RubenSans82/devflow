@@ -103,7 +103,7 @@ html::before {
   background-image:
     linear-gradient(rgba(var(--df-accent-primary-rgb), 0.13) 1.5px, transparent 1.5px),
     linear-gradient(90deg, rgba(var(--df-accent-primary-rgb), 0.13) 1.5px, transparent 1.5px),
-    radial-gradient(circle at var(--mouse-x, 50vw) var(--mouse-y, 50vh), rgba(var(--df-accent-primary-rgb), 0.10) 0 20px, transparent 120px);
+    radial-gradient(circle at var(--mouse-x, 50vw) var(--mouse-y, 50vh), rgba(var(--df-accent-primary-rgb), 0.1) 0 10px, transparent 60px);
   background-size: 40px 40px, 40px 40px, 100vw 100vh;
   background-repeat: repeat, repeat, no-repeat;
   background-blend-mode: lighten;
@@ -1549,6 +1549,16 @@ input:-webkit-autofill:active {
  
  
  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
   }
 }
 
@@ -1586,5 +1596,66 @@ input:-webkit-autofill:active {
     color: var(--df-text-primary);
     padding: 0;
   }
+
+  .notification-fab-bottom .notification-bell-btn,
+  .notification-fab-bottom .notification-bell-btn .bi-bell {
+    color: var(--df-text-primary) !important;
+  }
+}
+
+/* Animación de cortinilla para el menú fullscreen */
+@keyframes notificationSlideDown {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.notification-slide-fullscreen {
+  animation: notificationSlideDown 0.45s cubic-bezier(0.77,0,0.18,1) both;
+  will-change: transform, opacity;
+}
+
+.notification-slide-fullscreen, .notification-slide-fullscreen * {
+  font-family: var(--font-family-sans-serif) !important;
+  font-weight: 500;
+  color: inherit !important;
+  text-shadow: none !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: 0.01em;
+}
+
+.notification-slide-fullscreen .list-group-item {
+  background: transparent;
+  color: inherit !important;
+  border: none;
+  font-size: 1.08em;
+  font-weight: 500;
+  text-shadow: none;
+}
+
+.notification-slide-fullscreen .text-success {
+  color: #4be18a !important; /* Verde tech para aceptado */
+}
+.notification-slide-fullscreen .text-danger {
+  color: #ff4b6e !important; /* Rojo tech para rechazado */
+}
+
+.notification-slide-fullscreen .border-bottom.fw-bold.bg-dark.text-light {
+  color: var(--df-accent-primary) !important;
+  background: var(--df-bg-primary) !important;
+  font-family: var(--font-family-headings) !important;
+  font-weight: 700 !important;
+  font-size: 1.35em !important;
+  letter-spacing: 0.02em;
+  text-shadow: none !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  border-bottom: 2px solid var(--df-accent-primary) !important;
 }
 
