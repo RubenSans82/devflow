@@ -103,7 +103,7 @@ html::before {
   background-image:
     linear-gradient(rgba(var(--df-accent-primary-rgb), 0.13) 1.5px, transparent 1.5px),
     linear-gradient(90deg, rgba(var(--df-accent-primary-rgb), 0.13) 1.5px, transparent 1.5px),
-    radial-gradient(circle at var(--mouse-x, 50vw) var(--mouse-y, 50vh), rgba(var(--df-accent-primary-rgb), 0.10) 0 50px, transparent 120px);
+    radial-gradient(circle at var(--mouse-x, 50vw) var(--mouse-y, 50vh), rgba(var(--df-accent-primary-rgb), 0.10) 0 20px, transparent 120px);
   background-size: 40px 40px, 40px 40px, 100vw 100vh;
   background-repeat: repeat, repeat, no-repeat;
   background-blend-mode: lighten;
