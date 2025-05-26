@@ -2,7 +2,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
 import { auth, githubProvider } from '../../firebaseConfig'; // Ajusta la ruta si es necesario
-import { signInWithPopup } from 'firebase/auth';
+import { signInWithPopup, signInWithRedirect } from 'firebase/auth';
 
 
 const AuthContext = createContext();
@@ -15,8 +15,23 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const signInWithGitHub = () => {
-    return signInWithPopup(auth, githubProvider);
+  const signInWithGitHub = async () => {
+    try {
+      // Intenta primero con popup
+      return await signInWithPopup(auth, githubProvider);
+    } catch (err) {
+      // Si el error es de popup bloqueado o similar, haz fallback a redirect
+      if (
+        err.code === 'auth/popup-blocked' ||
+        err.code === 'auth/popup-closed-by-user' ||
+        err.code === 'auth/cancelled-popup-request' ||
+        err.code === 'auth/operation-not-supported-in-this-environment'
+      ) {
+        return await signInWithRedirect(auth, githubProvider);
+      } else {
+        throw err;
+      }
+    }
   };
 
   const logout = () => {

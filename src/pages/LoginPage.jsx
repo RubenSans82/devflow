@@ -77,7 +77,7 @@ const LoginPage = () => {
             <div className="card-body pt-2 px-4 pb-4 pt-md-3 px-md-5 pb-md-5"> {/* Ajustado padding superior */}
               <div className="text-center mb-4">
                 <img 
-                  src="/src/assets/logo.png" 
+                  src="/logo.png" 
                   alt="DevFlow Logo" 
                   className="login-logo-responsive"
                   style={{ maxWidth: '350px', width: '100%', height: 'auto', marginBottom: '1rem' }}
