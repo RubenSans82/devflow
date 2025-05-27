@@ -72,12 +72,11 @@ const ProjectCard = ({ project, showDetailsButton = true, displayContext = 'home
             )}
             {userRole === 'collaborator' && (
               <span className="badge bg-success position-absolute top-0 end-0 m-2" title="Eres colaborador">Colaborador</span>
-            )}
-            {/* Botón para solicitar ser colaborador, abajo a la izquierda */}
+            )}            {/* Botón para solicitar ser colaborador, abajo a la izquierda */}
             {canRequest && (
               <button
                 className="btn btn-outline-primary btn-sm mt-2"
-                style={{ position: 'absolute', left: 0, bottom: 0, margin: 12, zIndex: 2 }}
+                style={{ position: 'absolute', right: 25, top: -8, zIndex: 2 }}
                 onClick={handleRequestCollab}
                 disabled={requesting || requestSent}
                 title="Solicitar ser colaborador"
