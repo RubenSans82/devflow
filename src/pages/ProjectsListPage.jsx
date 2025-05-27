@@ -1,9 +1,9 @@
 // src/pages/ProjectsListPage.jsx
 import React, { useState, useEffect } from 'react';
-// Importar getAllProjects y getPublicProjects
-import { getAllProjects, getPublicProjects } from '../services/firestore'; 
+// Importar getAllProjects, getPublicProjects, getUserProjects
+import { getAllProjects, getPublicProjects, getUserProjectsWithType } from '../services/firestore'; 
 import ProjectCard from '../components/ProjectCard';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const ProjectsListPage = () => {
@@ -11,6 +11,7 @@ const ProjectsListPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { currentUser } = useAuth();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -18,7 +19,12 @@ const ProjectsListPage = () => {
       setError('');
       try {
         let fetchedProjects;
-        if (currentUser) {
+        const params = new URLSearchParams(location.search);
+        const userId = params.get('user');
+        if (userId) {
+          // Si hay filtro por usuario, mostrar owner y colaborador, y marcar el tipo
+          fetchedProjects = await getUserProjectsWithType(userId);
+        } else if (currentUser) {
           // Si el usuario está logueado, obtiene todos los proyectos (públicos y privados de todos)
           // Esto funcionará si las reglas de Firestore lo permiten (Opción 1 descrita)
           fetchedProjects = await getAllProjects();
@@ -44,7 +50,7 @@ const ProjectsListPage = () => {
     };
 
     fetchProjects();
-  }, [currentUser]); // Volver a ejecutar si currentUser cambia
+  }, [currentUser, location.search]); // Volver a ejecutar si currentUser o la búsqueda en la URL cambian
 
   if (loading) {
     return (
@@ -89,7 +95,7 @@ const ProjectsListPage = () => {
             {projects.map(project => (
               // Clase de columna de Bootstrap con d-flex para igualar alturas y wrapper específico renombrado
               <div className="col-12 col-md-6 col-lg-4 d-flex align-items-stretch plist-card-column-wrapper" key={project.id}>
-                <ProjectCard project={project} displayContext="projectsList" showDetailsButton={true} />
+                <ProjectCard project={project} displayContext="projectsList" showDetailsButton={true} userRole={project._userRole} />
               </div>
             ))}
           </div>

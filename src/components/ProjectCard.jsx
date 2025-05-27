@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { addCollaborationRequestNotification } from '../services/firestore';
 
-// Acepta nuevas props: displayContext y onRadialAction
-const ProjectCard = ({ project, showDetailsButton = true, displayContext = 'home', onRadialAction }) => {
+// Acepta nuevas props: displayContext, onRadialAction, userRole
+const ProjectCard = ({ project, showDetailsButton = true, displayContext = 'home', onRadialAction, userRole }) => {
   const [isRadialMenuOpen, setIsRadialMenuOpen] = useState(false);
   const { currentUser } = useAuth ? useAuth() : { currentUser: null };
   const [requesting, setRequesting] = useState(false);
@@ -66,6 +66,13 @@ const ProjectCard = ({ project, showDetailsButton = true, displayContext = 'home
           <div className="card-content" style={{ position: 'relative', minHeight: 120 }}>
             <h3 className="card-title">{project.title}</h3>
             <p className="card-description">{project.description}</p>
+            {/* Badge de rol (propietario/colaborador) */}
+            {userRole === 'owner' && (
+              <span className="badge bg-primary position-absolute top-0 end-0 m-2" title="Eres propietario">Propietario</span>
+            )}
+            {userRole === 'collaborator' && (
+              <span className="badge bg-success position-absolute top-0 end-0 m-2" title="Eres colaborador">Colaborador</span>
+            )}
             {/* Botón para solicitar ser colaborador, abajo a la izquierda */}
             {canRequest && (
               <button

@@ -80,14 +80,22 @@ const Navbar = () => {
               <li className="nav-item me-lg-2">
                 <form className="d-flex global-search-form" role="search" onSubmit={handleSearchSubmit}>
                   <input 
-                    className="form-control form-control-sm global-search-input" 
+                    className="form-control form-control-sm global-search-input rounded-start-pill rounded-end-0" 
                     type="search" 
-                    placeholder="Buscar proyectos, tareas..." 
+                    placeholder="Proyectos, tareas, usuarios..." 
                     aria-label="Buscar"
                     value={searchTerm}
                     onChange={handleSearchChange} 
+                    style={{height: '34px', borderTopRightRadius: 0, borderBottomRightRadius: 0, borderRight: 'none'}}
                   />
-                  {/* <button className="btn btn-outline-primary btn-sm" type="submit"><i className="bi bi-search"></i></button> */}
+                  <button 
+                    className="btn btn-primary d-flex align-items-center justify-content-center rounded-end" 
+                    type="submit" 
+                    aria-label="Buscar"
+                    style={{height: '34px', minWidth: '38px', borderTopLeftRadius: 0, borderBottomLeftRadius: 0, boxShadow: 'none'}}
+                  >
+                    <i className="bi bi-search" style={{fontSize: '1.2rem'}}></i>
+                  </button>
                 </form>
               </li>
             )}

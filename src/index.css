@@ -1544,29 +1544,6 @@ input:-webkit-autofill:active {
 @media (max-width: 576px) {
   .login-logo-responsive {
     max-width: 220px;
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
   }
 }
 
@@ -1687,7 +1664,7 @@ input:-webkit-autofill:active {
   background-color: var(--df-bg-secondary);
   border-color: var(--df-accent-primary);
   box-shadow: 0 0 0 0.2rem rgba(var(--df-accent-primary-rgb), 0.25), 0 0 10px rgba(var(--df-accent-primary-rgb), 0.3);
-  min-width: 300px; /* Expandir ligeramente al enfocar */
+  /* min-width: 300px; */ /* Eliminado para evitar cambio de tamaño */
 }
 
 .global-search-input::placeholder {
@@ -1771,8 +1748,8 @@ input:-webkit-autofill:active {
 }
 
 .search-results-section .search-card:hover {
-  border-color: var(--df-accent-secondary);
-  box-shadow: 0 4px 24px 4px rgba(var(--df-accent-secondary-rgb), 0.18), 0 0 0 2.5px var(--df-accent-secondary) inset;
+  border-color: var(--df-accent-primary); /* Mantener azul */
+  box-shadow: 0 0 16px 4px var(--df-accent-primary), 0 4px 24px 4px rgba(var(--df-accent-primary-rgb), 0.18), 0 0 0 2.5px var(--df-accent-primary) inset;
   transform: translateY(-2px) scale(1.012);
 }
 
@@ -1811,5 +1788,23 @@ input:-webkit-autofill:active {
   .search-results-section .search-card {
     padding: 1rem 0.7rem;
   }
+}
+
+/* Badge de propietario/colaborador en ProjectCard */
+.project-card .badge.bg-primary {
+  background: linear-gradient(90deg, var(--df-accent-primary), #63ceff);
+  color: #fff;
+  font-size: 0.92em;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 8px 1px rgba(var(--df-accent-primary-rgb),0.18);
+}
+.project-card .badge.bg-success {
+  background: linear-gradient(90deg, #4A90E2, var(--df-accent-secondary));
+  color: #fff;
+  font-size: 0.92em;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 8px 1px rgba(var(--df-accent-secondary-rgb),0.18);
 }
 

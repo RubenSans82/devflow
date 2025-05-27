@@ -313,6 +313,19 @@ export const getProjectsWhereUserIsCollaborator = async (userId) => {
     .filter(project => project.ownerId !== userId);
 };
 
+// Obtener proyectos donde el usuario es owner o colaborador, con tipo
+export const getUserProjectsWithType = async (userId) => {
+  // Owner
+  const ownerProjects = await getUserProjects(userId);
+  // Colaborador (sin duplicados)
+  const collabProjects = await getProjectsWhereUserIsCollaborator(userId);
+  // Marca el tipo
+  const ownerMarked = ownerProjects.map(p => ({ ...p, _userRole: 'owner' }));
+  const collabMarked = collabProjects.map(p => ({ ...p, _userRole: 'collaborator' }));
+  // Unir y devolver
+  return [...ownerMarked, ...collabMarked];
+};
+
 // Añadir solicitud de colaboración (notificación al owner)
 export const addCollaborationRequestNotification = async ({ projectId, projectTitle, ownerId, requesterId, requesterName }) => {
   if (!projectId || !ownerId || !requesterId) throw new Error('Faltan datos para la notificación');
@@ -464,6 +477,20 @@ export const searchTasks = async (searchTerm) => {
     console.error("Error searching tasks:", error);
     throw error;
   }
+};
+
+// Buscar usuarios por nombre o email
+export const searchUsers = async (searchTerm) => {
+  if (!searchTerm || searchTerm.trim() === '') return [];
+  const usersRef = collection(db, 'users');
+  const querySnapshot = await getDocs(usersRef);
+  const lowerSearchTerm = searchTerm.toLowerCase();
+  return querySnapshot.docs
+    .map(doc => ({ id: doc.id, ...doc.data() }))
+    .filter(user =>
+      (user.displayName && user.displayName.toLowerCase().includes(lowerSearchTerm)) ||
+      (user.email && user.email.toLowerCase().includes(lowerSearchTerm))
+    );
 };
 
 // --- Notificaciones genéricas ---
