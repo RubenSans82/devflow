@@ -3,6 +3,15 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Helper function to check if a user is a member (owner or collaborator) of a project
+    function isProjectMember(projectId, userId) {
+      // This get() is performed by the currently authenticated user (request.auth.uid)
+      // The project's read rules must allow this user to read the project document.
+      let projectData = get(/databases/$(database)/documents/projects/$(projectId)).data;
+      return projectData.ownerId == userId ||
+             (projectData.collaborators is list && userId in projectData.collaborators);
+    }
+
     // Colección de Usuarios
     match /users/{userId} {
       allow read: if request.auth != null; // Cualquiera autenticado puede leer perfiles (para buscar colaboradores, etc.)
@@ -87,10 +96,50 @@ service cloud.firestore {
 
     // Colección de Notificaciones
     match /notifications/{notificationId} {
-      allow read, write, create, delete: if request.auth != null && 
-                                      (request.auth.uid == resource.data.ownerId || // El dueño del proyecto (target de la notif de solicitud)
-                                       request.auth.uid == resource.data.requesterId || // El que pide unirse
-                                       request.auth.uid == resource.data.userId); // El destinatario de una notificación genérica
+      allow read, update, delete: if request.auth != null && (
+        // El destinatario de la notificación puede leer/actualizar/borrar
+        request.auth.uid == resource.data.userId ||
+        // Para notificaciones de solicitud de colaboración, el owner del proyecto o el solicitante pueden interactuar
+        (resource.data.type == 'collaboration_request' && (request.auth.uid == resource.data.ownerId || request.auth.uid == resource.data.requesterId))
+        // Podríamos añadir más condiciones específicas si otros tipos de notificaciones tienen otros "actores"
+      );      allow create: if request.auth != null &&
+      (
+        // Caso 1: Notificación de chat - TEMPORAL: reglas súper permisivas para depurar
+        (
+          request.resource.data.type == 'chat_message' &&
+          // Solo verificamos que no se notifique a sí mismo
+          request.auth.uid != request.resource.data.userId
+        ) ||
+        // Caso 2: Notificación de solicitud de colaboración - mantenemos lógica original
+        (
+          request.resource.data.type == 'collaboration_request' &&
+          request.resource.data.projectId != null &&
+          exists(/databases/$(database)/documents/projects/$(request.resource.data.projectId)) &&
+          request.resource.data.requesterId == request.auth.uid &&
+          // Asegurar que el ownerId en la notificación es realmente el owner del proyecto.
+          get(/databases/$(database)/documents/projects/$(request.resource.data.projectId)).data.ownerId == request.resource.data.ownerId
+        )
+        // Aquí podrían ir otras condiciones para otros tipos de notificaciones si se añaden en el futuro.
+      );
+    }
+
+    // Colección de Chats de Proyecto
+    match /projectChats/{projectId}/messages/{messageId} {
+      allow read, list: if request.auth != null && (
+        // Dueño del proyecto
+        get(/databases/$(database)/documents/projects/$(projectId)).data.ownerId == request.auth.uid ||
+        // Colaborador
+        (get(/databases/$(database)/documents/projects/$(projectId)).data.collaborators is list &&
+         request.auth.uid in get(/databases/$(database)/documents/projects/$(projectId)).data.collaborators)
+      );
+      allow create: if request.auth != null && (
+        // Dueño del proyecto
+        get(/databases/$(database)/documents/projects/$(projectId)).data.ownerId == request.auth.uid ||
+        // Colaborador
+        (get(/databases/$(database)/documents/projects/$(projectId)).data.collaborators is list &&
+         request.auth.uid in get(/databases/$(database)/documents/projects/$(projectId)).data.collaborators)
+      );
+      // No se permite update/delete de mensajes
     }
   }
 }

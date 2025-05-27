@@ -1,5 +1,5 @@
 // src/services/firestore.js
-import { db } from '../../firebaseConfig'; // Asegúrate que la ruta es correcta
+import { db, auth } from '../../firebaseConfig'; // Asegúrate que la ruta es correcta
 import { 
   collection, 
   addDoc, 
@@ -350,19 +350,12 @@ export const addCollaborationRequestNotification = async ({ projectId, projectTi
 
 // Obtener notificaciones para un usuario
 export const getNotificationsForUser = async (userId) => {
-  // Devuelve notificaciones donde el usuario es owner o requester
-  const qOwner = query(collection(db, 'notifications'), where('ownerId', '==', userId));
-  const qRequester = query(collection(db, 'notifications'), where('requesterId', '==', userId));
-  const [ownerSnap, requesterSnap] = await Promise.all([
-    getDocs(qOwner),
-    getDocs(qRequester)
-  ]);
-  // Unir y eliminar duplicados por id
-  const all = [...ownerSnap.docs, ...requesterSnap.docs];
-  const unique = Array.from(new Map(all.map(doc => [doc.id, { id: doc.id, ...doc.data() }])).values());
-  // Ordenar por fecha descendente si existe createdAt
-  unique.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-  return unique;
+  // Devuelve notificaciones donde el usuario es destinatario (userId)
+  const q = query(collection(db, 'notifications'), where('userId', '==', userId));
+  const snap = await getDocs(q);
+  const all = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  all.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+  return all;
 };
 
 // Marcar notificación como leída
@@ -496,10 +489,10 @@ export const searchUsers = async (searchTerm) => {
 // --- Notificaciones genéricas ---
 /**
  * Crea una notificación genérica para un usuario
- * @param {Object} notificationData - { userId, type, title, message, extra }
+ * @param {Object} notificationData - { userId, type, title, message, projectId, projectTitle, extra }
  * @returns {Promise<string>} id de la notificación creada
  */
-export const addNotification = async ({ userId, type, title, message, extra = {} }) => {
+export const addNotification = async ({ userId, type, title, message, projectId, projectTitle, extra = {}, ...restParams }) => {
   if (!userId || !type || !title) throw new Error('Faltan datos obligatorios para la notificación');
   try {
     const notification = {
@@ -507,14 +500,49 @@ export const addNotification = async ({ userId, type, title, message, extra = {}
       type,   // ejemplo: 'task_created'
       title,  // ejemplo: 'Nueva tarea en tu proyecto'
       message, // ejemplo: 'Juan ha creado una tarea en tu proyecto X'
+      ...(projectId && { projectId }), // Incluir projectId si existe
+      ...(projectTitle && { projectTitle }), // Incluir projectTitle si existe
       ...extra, // datos adicionales opcionales
+      ...restParams, // otros parámetros que no están desestructurados explícitamente
       createdAt: Timestamp.now(),
       read: false
     };
+    console.log('[addNotification] Creando notificación:', notification);
+    console.log('[addNotification] Usuario autenticado actual:', auth.currentUser?.uid);
+    console.log('[addNotification] ¿Auth válido?:', !!auth.currentUser);
+    console.log('[addNotification] ¿userId válido?:', !!userId);
+    console.log('[addNotification] ¿type válido?:', !!type);
+    console.log('[addNotification] ¿projectId válido?:', !!projectId);
+    console.log('[addNotification] ¿Son diferentes emisor y destinatario?:', auth.currentUser?.uid !== userId);
+    
     const docRef = await addDoc(collection(db, 'notifications'), notification);
+    console.log('[addNotification] ✅ Notificación guardada con ID:', docRef.id);
+    return docRef.id;
     return docRef.id;
   } catch (error) {
-    console.error('Error al crear notificación:', error);
+    console.error('[addNotification] ❌ Error al crear notificación:', error);
+    console.error('[addNotification] ❌ Error code:', error.code);
+    console.error('[addNotification] ❌ Error message:', error.message);
+    console.error('[addNotification] ❌ Error details:', error);
     throw error;
   }
 };
+
+// --- CHAT DE PROYECTO ---
+import { collection as fbCollection, addDoc as fbAddDoc, serverTimestamp, query as fbQuery, orderBy as fbOrderBy, onSnapshot as fbOnSnapshot } from 'firebase/firestore';
+// Escuchar mensajes en tiempo real
+export function getProjectChatMessages(projectId, setMessages, setLoading) {
+  const q = fbQuery(fbCollection(db, 'projectChats', projectId, 'messages'), fbOrderBy('createdAt'));
+  const unsubscribe = fbOnSnapshot(q, (snapshot) => {
+    setMessages(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    setLoading(false);
+  });
+  return unsubscribe;
+}
+// Enviar mensaje
+export async function sendProjectChatMessage(projectId, message) {
+  await fbAddDoc(fbCollection(db, 'projectChats', projectId, 'messages'), {
+    ...message,
+    createdAt: serverTimestamp(),
+  });
+}

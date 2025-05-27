@@ -1,11 +1,13 @@
 // src/components/NotificationCenter.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import ReactDOM from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { getNotificationsForUser, markNotificationAsRead, acceptCollaborationRequest, rejectCollaborationRequest } from '../services/firestore';
 import { useAuth } from '../contexts/AuthContext';
 
 const NotificationCenter = () => {
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -45,7 +47,6 @@ const NotificationCenter = () => {
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [open]);
-
   const handleMarkAsRead = async (notifId) => {
     try {
       await markNotificationAsRead(notifId); // Actualiza en Firestore
@@ -57,6 +58,26 @@ const NotificationCenter = () => {
     } catch (error) {
       console.error("Error marking notification as read:", error);
       // Aquí podrías añadir una notificación de error al usuario si es necesario
+    }
+  };  const handleNotificationClick = async (notif) => {
+    console.log('[NotificationCenter] Click en notificación:', notif);
+    try {
+      // Marcar como leída si no lo está
+      if (!notif.read) {
+        await handleMarkAsRead(notif.id);
+      }
+        // Navegar según el tipo de notificación
+      if (notif.projectId) {
+        console.log('[NotificationCenter] Navegando a proyecto:', notif.projectId);
+        console.log('[NotificationCenter] Ruta de navegación: /project/' + notif.projectId);        // Cerrar el dropdown de notificaciones
+        setOpen(false);
+        // Navegar a los detalles del proyecto
+        navigate(`/project/${notif.projectId}`);
+      } else {
+        console.log('[NotificationCenter] No hay projectId en la notificación');
+      }
+    } catch (error) {
+      console.error("Error handling notification click:", error);
     }
   };
 
@@ -99,12 +120,12 @@ const NotificationCenter = () => {
     }
     return false;
   };
-
   const isCurrentUserRecipient = (notif) => {
     // Solo el destinatario puede aceptar/rechazar
     if (notif.type === 'collaboration_request') {
       return notif.ownerId === currentUser.uid;
     }
+    // Para notificaciones de chat, tareas y otros tipos genéricos
     if (notif.userId) {
       return notif.userId === currentUser.uid;
     }
@@ -180,12 +201,13 @@ const NotificationCenter = () => {
         {loading ? (
           <li className="list-group-item text-center">Cargando...</li>
         ) : notifications.length === 0 ? (
-          <li className="list-group-item text-center text-muted">No tienes notificaciones.</li>
-        ) : notifications.filter(isNotifVisibleForCurrentUser).length === 0 ? (
+          <li className="list-group-item text-center text-muted">No tienes notificaciones.</li>        ) : notifications.filter(isNotifVisibleForCurrentUser).length === 0 ? (
           <li className="list-group-item text-center text-muted">No tienes notificaciones para ti.</li>
-        ) : notifications.filter(isNotifVisibleForCurrentUser).map(notif => (
-          <li key={notif.id} className={`list-group-item${notif.read ? ' text-muted' : ''}`}> 
-            <div style={{ fontSize: '0.97em' }}>
+        ) : notifications.filter(isNotifVisibleForCurrentUser).map(notif => {
+          console.log('[NotificationCenter] Renderizando notificación:', notif);
+          return (
+            <li key={notif.id} className={`list-group-item${notif.read ? ' text-muted' : ''}`}>
+              <div style={{ fontSize: '0.97em' }}>
               {notif.type === 'collaboration_request' && (
                 <>
                   <span><b>{notif.requesterName}</b> quiere colaborar en <b>{notif.projectTitle}</b></span>
@@ -212,16 +234,79 @@ const NotificationCenter = () => {
                   )}
                 </>
               )}
-              {/* Otros tipos de notificación aquí si se desea */}
-            </div>
-            {/* Botón de marcar como leída solo para el destinatario y si está pendiente */}
-            {!notif.read && notif.status === 'pending' && isCurrentUserRecipient(notif) && (
+                {/* Notificaciones de chat */}
+              {notif.type === 'chat_message' && (
+                <>
+                  <div 
+                    className="d-flex align-items-start notification-clickable"
+                    onClick={() => handleNotificationClick(notif)}
+                    style={{ 
+                      cursor: 'pointer',
+                      padding: '4px',
+                      borderRadius: '6px',
+                      transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(13, 110, 253, 0.1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <i className="bi bi-chat-dots me-2 text-primary" style={{ fontSize: '1.2em', marginTop: '2px' }}></i>
+                    <div className="flex-grow-1">
+                      <div><strong>{notif.title}</strong></div>
+                      <div className="text-muted small mb-1">{notif.message}</div>
+                      {notif.projectTitle && (
+                        <div className="d-flex align-items-center text-primary small">
+                          <i className="bi bi-folder me-1" style={{ fontSize: '0.9em' }}></i>
+                          <span style={{ fontWeight: '500' }}>{notif.projectTitle}</span>
+                          <i className="bi bi-arrow-right ms-2" style={{ fontSize: '0.8em', opacity: 0.7 }}></i>                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}              {/* Notificaciones de tareas */}
+              {notif.type === 'task_created' && (
+                <>
+                  <div 
+                    className="d-flex align-items-start notification-clickable"
+                    onClick={() => handleNotificationClick(notif)}
+                    style={{ 
+                      cursor: 'pointer',
+                      padding: '4px',
+                      borderRadius: '6px',
+                      transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(25, 135, 84, 0.1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <i className="bi bi-check-square me-2 text-success" style={{ fontSize: '1.2em', marginTop: '2px' }}></i>
+                    <div className="flex-grow-1">
+                      <div><strong>{notif.title}</strong></div>
+                      <div className="text-muted small mb-1">{notif.message}</div>
+                      {notif.projectTitle && (
+                        <div className="d-flex align-items-center text-primary small">
+                          <i className="bi bi-folder me-1" style={{ fontSize: '0.9em' }}></i>
+                          <span style={{ fontWeight: '500' }}>{notif.projectTitle}</span>
+                          <i className="bi bi-arrow-right ms-2" style={{ fontSize: '0.8em', opacity: 0.7 }}></i>                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Otros tipos de notificación */}
+              {!['collaboration_request', 'chat_message', 'task_created'].includes(notif.type) && (
+                <>
+                  <div><strong>{notif.title}</strong></div>
+                  <div className="text-muted small">{notif.message}</div>
+                </>
+              )}
+            </div>            {/* Botón de marcar como leída para el destinatario */}
+            {!notif.read && isCurrentUserRecipient(notif) && (
               <button className="btn btn-link btn-sm p-0 ms-2 float-end" onClick={() => handleMarkAsRead(notif.id)} title="Marcar como leída">
                 <i className="bi bi-check2"></i>
-              </button>
-            )}
+              </button>            )}
           </li>
-        ))}
+          );
+        })}
       </ul>
     </div>
   );

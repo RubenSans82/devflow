@@ -17,6 +17,7 @@ import { useAuth } from '../contexts/AuthContext';
 import TaskItem from '../components/TaskItem';
 import EditTaskModal from '../components/EditTaskModal'; // Importar EditTaskModal
 import ConfirmationModal from '../components/ConfirmationModal'; // Importar ConfirmationModal
+import ProjectChat from '../components/ProjectChat';
 
 const ProjectDetailPage = () => {
   const { projectId } = useParams();
@@ -468,17 +469,17 @@ const ProjectDetailPage = () => {
         </div>
       </div>
 
-      {/* Nueva fila para Colaboradores y Tareas */}
-      <div className="row align-items-start"> {/* Añadido align-items-start */}
-        {/* Columna de Colaboradores (Solo para el propietario) */}
-        {canManageProject && (
-          <div className="col-md-6 mb-4">
-            <div className="card h-100"> {/* Añadido h-100 para igualar alturas si es necesario */}
+      {/* Nueva disposición: 2 columnas bajo detalles */}
+      <div className="row">
+        {/* Columna izquierda: Colaboradores y Tareas */}
+        <div className="col-lg-7 mb-4">
+          {/* Colaboradores (solo propietario) */}
+          {canManageProject && (
+            <div className="card mb-4">
               <div className="card-body">
                 <h5 className="card-title dashboard-title-tech-subtitle mb-3">Gestionar Colaboradores</h5>
                 {collaboratorSuccess && <div className="alert alert-success">{collaboratorSuccess}</div>}
                 {collaboratorError && <div className="alert alert-danger">{collaboratorError}</div>}
-                
                 {!showAddCollaboratorForm ? (
                   <button className="btn btn-primary mb-3" onClick={() => setShowAddCollaboratorForm(true)}>
                     <i className="bi bi-person-plus-fill me-2"></i>Añadir Colaborador
@@ -507,14 +508,12 @@ const ProjectDetailPage = () => {
                     </div>
                   </form>
                 )}
-
                 {(() => {
                   const validCollaborators = project.collaborators && project.collaborators.filter(id => id && typeof id === 'string' && id.trim() !== '');
                   if (validCollaborators && validCollaborators.length > 0) {
                     return (
                       <ul className="list-group">
                         {validCollaborators.map((collabId, index) => {
-                          // Buscar el usuario en el array de usuarios cargados
                           const userObj = users.find(u => u.id === collabId);
                           const displayName = userObj ? (userObj.displayName || userObj.githubUsername || userObj.email) : collabId;
                           return (
@@ -537,12 +536,10 @@ const ProjectDetailPage = () => {
                 })()}
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Columna de Tareas */}
-        <div className={canManageProject ? "col-md-6 mb-4" : "col-12 mb-4"}> 
-          <div className="card h-100"> 
+          {/* Tareas del Proyecto */}
+          <div className="card">
             <div className="card-body">
               <h5 className="card-title dashboard-title-tech-subtitle mb-3">Tareas del Proyecto</h5>
               
@@ -555,7 +552,7 @@ const ProjectDetailPage = () => {
               {taskError && <div className="alert alert-danger">{taskError}</div>}
 
               {showCreateTaskForm && (
-                <div className="card mb-3 create-task-form-card"> {/* Añadida la clase create-task-form-card */}
+                <div className="card mb-3 create-task-form-card">
                   <div className="card-body">
                     <h6 className="card-title">Nueva Tarea</h6>
                     <form onSubmit={handleCreateTask}>
@@ -576,7 +573,7 @@ const ProjectDetailPage = () => {
                           ))}
                         </select>
                       </div>
-                      <button type="submit" className="btn btn-primary me-2 mb-2 mb-md-0"> {/* Cambiado de btn-success a btn-primary */}
+                      <button type="submit" className="btn btn-primary me-2 mb-2 mb-md-0">
                         <i className="bi bi-check-circle me-1"></i> Guardar Tarea
                       </button>
                       <button type="button" className="btn btn-secondary mb-2 mb-md-0" onClick={() => { setShowCreateTaskForm(false); setTaskError(''); }}>
@@ -599,7 +596,7 @@ const ProjectDetailPage = () => {
                       onDelete={canManageTasks ? handleDeleteTask : undefined}
                       users={users}
                       canManage={canManageTasks}
-                      collaborators={project?.collaborators || []} // Pasar lista de colaboradores
+                      collaborators={project?.collaborators || []}
                     />
                   ))}
                 </ul>
@@ -609,7 +606,19 @@ const ProjectDetailPage = () => {
             </div>
           </div>
         </div>
-      </div> {/* Fin de la nueva fila */}
+        {/* Columna derecha: Chat */}
+        <div className="col-lg-5 mb-4 d-flex flex-column" style={{marginTop: 0, paddingTop: 0}}>
+          <div className="h-100" style={{display: 'flex', flexDirection: 'column', justifyContent: 'flex-start'}}>            {project && (project.ownerId === currentUser?.uid || (project.collaborators && project.collaborators.includes(currentUser?.uid))) && (
+              <ProjectChat 
+                projectId={projectId} 
+                projectTitle={project.title}
+                projectUsers={[project.ownerId, ...(project.collaborators || [])]} 
+                cardBorderColor="#dee2e6" 
+              />
+            )}
+          </div>
+        </div>
+      </div> {/* Fin de la nueva disposición */}
 
       {editingTask && showEditTaskModal && (
         <EditTaskModal 

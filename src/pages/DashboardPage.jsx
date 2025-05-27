@@ -123,10 +123,8 @@ const DashboardPage = () => {
   const displayName = loadingProfile 
     ? 'Cargando...' 
     : userProfileData?.githubUsername || userProfileData?.displayName || currentUser.email;
-
   const handleRadialAction = (action, projectId) => {
-    console.log(`Dashboard action: ${action}, for project ID: ${projectId}`);
-    switch (action) {
+    console.log(`Dashboard action: ${action}, for project ID: ${projectId}`);    switch (action) {
       case 'view_details':
         navigate(`/project/${projectId}`);
         break;

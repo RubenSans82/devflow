@@ -1,5 +1,5 @@
-import React from 'react';
-import { Routes, Route, Navigate, Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 import Navbar from './components/Navbar';
@@ -30,11 +30,23 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+// Componente para manejar el scroll al inicio de cada navegación
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
 
-function App() {
-  return (
+  useEffect(() => {
+    // Forzar scroll al inicio en cada cambio de ruta
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
+
+
+function App() {  return (
     <AuthProvider>
       <div className="App d-flex flex-column min-vh-100"> {/* Asegura que App ocupe toda la altura y sea un flex container */}
+        <ScrollToTop /> {/* Agregar el componente de scroll */}
         <Navbar />
         <main className="flex-grow-1 d-flex flex-column"> {/* flex-grow-1 para que main ocupe el espacio disponible */}
             <div className="d-flex flex-column min-vh-100">

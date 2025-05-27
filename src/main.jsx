@@ -14,7 +14,12 @@ import 'bootstrap-icons/font/bootstrap-icons.css'; // Opcional: para iconos de B
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter> {/* Envuelve App con BrowserRouter */}
+    <BrowserRouter 
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true
+      }}
+    > {/* Envuelve App con BrowserRouter */}
       <App />
     </BrowserRouter>
   </React.StrictMode>,
