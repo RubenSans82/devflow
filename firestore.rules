@@ -64,14 +64,9 @@ service cloud.firestore {
             || (resource.data.assignedTo != null && resource.data.assignedTo == request.auth.uid)
           )
         )
-      );
-
-      allow create: if request.auth != null && (
-        // Dueño del proyecto de la tarea
-        get(/databases/$(database)/documents/projects/$(request.resource.data.projectId)).data.ownerId == request.auth.uid ||
-        // Colaborador en el proyecto de la tarea
-        (get(/databases/$(database)/documents/projects/$(request.resource.data.projectId)).data.collaborators is list &&
-         request.auth.uid in get(/databases/$(database)/documents/projects/$(request.resource.data.projectId)).data.collaborators)
+      );      allow create: if request.auth != null && (
+        // Solo el dueño del proyecto puede crear tareas
+        get(/databases/$(database)/documents/projects/$(request.resource.data.projectId)).data.ownerId == request.auth.uid
       );
       
       allow update: if request.auth != null && (

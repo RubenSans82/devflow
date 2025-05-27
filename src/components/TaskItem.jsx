@@ -37,11 +37,20 @@ const formatDate = (dateFieldValue) => {
     }
   } catch (e) { 
     console.warn("Error al formatear fecha:", dateFieldValue, e); 
-  }
-  return 'Fecha inválida'; // O algún valor por defecto o manejo de error
+  }  return 'Fecha inválida'; // O algún valor por defecto o manejo de error
 };
 
-const TaskItem = ({ task, projectOwnerId, onEdit, onDelete, onStatusChange, collaborators = [] }) => {
+const TaskItem = ({ 
+  task, 
+  projectOwnerId, 
+  onEdit, 
+  onDelete, 
+  onStatusChange, 
+  canEdit = false,
+  canDelete = false,
+  collaborators = [],
+  users = []
+}) => {
   const { currentUser } = useAuth();
   const [creatorDisplayName, setCreatorDisplayName] = useState('');
   const [assignedToDisplayName, setAssignedToDisplayName] = useState('');
@@ -59,11 +68,13 @@ const TaskItem = ({ task, projectOwnerId, onEdit, onDelete, onStatusChange, coll
     };
     fetchUserNames();
   }, [task.creatorId, task.assignedTo]);
-
   const isCreator = currentUser && currentUser.uid === task.creatorId;
   const isProjectOwner = currentUser && currentUser.uid === projectOwnerId;
   const isCollaborator = currentUser && collaborators && collaborators.includes(currentUser.uid);
-  const canModify = isCreator || isProjectOwner || isCollaborator;
+  const isAssigned = currentUser && currentUser.uid === task.assignedTo;
+  
+  // Permisos para cambiar estado: owner, creador, asignado, o colaborador
+  const canChangeStatus = isProjectOwner || isCreator || isAssigned || isCollaborator;
 
   return (
     <li className="list-group-item mb-3 shadow-sm p-3">
@@ -85,11 +96,10 @@ const TaskItem = ({ task, projectOwnerId, onEdit, onDelete, onStatusChange, coll
               Vence: {task.dueDate.seconds ? new Date(task.dueDate.seconds * 1000).toLocaleDateString() : new Date(task.dueDate).toLocaleDateString()}
             </small>
           }
-        </div>
-        
-        {canModify && (onEdit || onDelete || onStatusChange) && (
+        </div>        
+        {(canEdit || canDelete || canChangeStatus) && (onEdit || onDelete || onStatusChange) && (
           <div className="task-actions mt-2 mt-md-0">
-            {onStatusChange && (
+            {onStatusChange && canChangeStatus && (
               <select 
                 className="form-select form-select-sm me-2 d-inline-block" 
                 style={{ width: 'auto' }}
@@ -102,16 +112,16 @@ const TaskItem = ({ task, projectOwnerId, onEdit, onDelete, onStatusChange, coll
                 <option value="completada">Completada</option>
               </select>
             )}
-            {canModify && onEdit && (
+            {canEdit && onEdit && (
               <button 
                 className="btn btn-outline-primary btn-sm me-2" 
-                onClick={() => onEdit(task)} // CORREGIDO: pasar la tarea, no el evento
+                onClick={() => onEdit(task)}
                 aria-label="Editar tarea"
               >
                 <i className="bi bi-pencil-square"></i> Editar
               </button>
             )}
-            {canModify && onDelete && (
+            {canDelete && onDelete && (
               <button 
                 onClick={() => {
                   console.log('[TaskItem] Botón eliminar pulsado para tarea:', task.id);
@@ -173,13 +183,15 @@ TaskItem.propTypes = {
       PropTypes.instanceOf(Date)
     ]),
     creatorId: PropTypes.string.isRequired,
-    assignedTo: PropTypes.string,
-  }).isRequired,
+    assignedTo: PropTypes.string,  }).isRequired,
   projectOwnerId: PropTypes.string.isRequired, 
   onEdit: PropTypes.func,       
   onDelete: PropTypes.func,     
   onStatusChange: PropTypes.func, 
-  collaborators: PropTypes.array, // Añadido para saber si el usuario es colaborador
+  canEdit: PropTypes.bool,
+  canDelete: PropTypes.bool,
+  collaborators: PropTypes.array,
+  users: PropTypes.array,
 };
 
 export default TaskItem;

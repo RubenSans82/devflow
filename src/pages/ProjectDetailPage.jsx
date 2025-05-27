@@ -416,16 +416,24 @@ const ProjectDetailPage = () => {
     }
     setShowConfirmationModal(false);
   };
-
   if (loading) return <div className="container mt-5"><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando...</span></div></div>;
   if (error) return <div className="container mt-5"><div className="alert alert-danger">Error: {error}</div></div>;
-  if (!project) return <div className="container mt-5"><div className="alert alert-warning">Proyecto no encontrado.</div></div>;
-
-  const isOwner = currentUser && project && project.ownerId === currentUser.uid;
+  if (!project) return <div className="container mt-5"><div className="alert alert-warning">Proyecto no encontrado.</div></div>;    const isOwner = currentUser && project && project.ownerId === currentUser.uid;
   const isCollaborator = currentUser && project && project.collaborators && project.collaborators.includes(currentUser.uid);
   const canManageProject = isOwner; // Solo el propietario puede editar/eliminar proyecto y gestionar colaboradores
-  const canCreateTasks = isOwner || isCollaborator; // Propietario y colaboradores pueden crear tareas
-  const canManageTasks = isOwner || isCollaborator; // Propietario y colaboradores pueden editar/eliminar tareas
+  const canCreateTasks = isOwner; // Solo el propietario puede crear tareas
+  const canDeleteAnyTask = isOwner; // Solo el propietario puede eliminar cualquier tarea
+
+  // Funciones auxiliares para permisos de tareas específicas
+  const canEditTask = (task) => {
+    if (!currentUser) return false;
+    return isOwner || (currentUser.uid === task.creatorId);
+  };
+
+  const canDeleteTask = (task) => {
+    if (!currentUser) return false;
+    return isOwner || (currentUser.uid === task.creatorId);
+  };
 
   return (
     <div className="container mt-5">
@@ -582,9 +590,7 @@ const ProjectDetailPage = () => {
                     </form>
                   </div>
                 </div>
-              )}
-
-              {tasks.length > 0 ? (
+              )}              {tasks.length > 0 ? (
                 <ul className="list-group">
                   {tasks.map(task => (
                     <TaskItem 
@@ -592,10 +598,11 @@ const ProjectDetailPage = () => {
                       task={task} 
                       projectOwnerId={project?.ownerId}
                       onStatusChange={handleTaskStatusChange}
-                      onEdit={canManageTasks ? handleEditTask : undefined}
-                      onDelete={canManageTasks ? handleDeleteTask : undefined}
+                      onEdit={canEditTask(task) ? handleEditTask : undefined}
+                      onDelete={canDeleteTask(task) ? handleDeleteTask : undefined}
                       users={users}
-                      canManage={canManageTasks}
+                      canEdit={canEditTask(task)}
+                      canDelete={canDeleteTask(task)}
                       collaborators={project?.collaborators || []}
                     />
                   ))}
